@@ -9,7 +9,7 @@ framework, an ORM, or WorldEdit.
 
 | Module | Coordinates | Package | Purpose |
 |---|---|---|---|
-| `core` | `dev.rooster.region:rooster-region` | `dev.rooster.region` | `Region`, `Face`, geometry helpers |
+| `core` | `dev.rooster.region:rooster-region` | `dev.rooster.region` | `Region`, `BlockPos`, `Face`, geometry helpers |
 | `worldedit` | `dev.rooster.region:rooster-region-worldedit` | `dev.rooster.region.worldedit` | WorldEdit selection conversions |
 
 Version: `1.0-SNAPSHOT`.
@@ -123,6 +123,23 @@ val all = region.enlarge(1)              // every edge moves out by 1
 `enlarge`/`shrink` accept a `Face` (`TOP`, `BOTTOM`, `WEST`, `EAST`, `NORTH`,
 `SOUTH`), an `Axis` (both faces on that axis), or nothing (every face). They
 return a new `Region` and never mutate the receiver.
+
+### Block positions
+
+`BlockPos` is a plain integer coordinate with no Bukkit or joml dependency. It
+implements `Comparable<BlockPos>`, ordered lexicographically by `x`, then `y`,
+then `z`, so `sorted()` gives a stable spatial order. `Region.blockAt` resolves
+the block at a position in the region's own world.
+
+```kotlin
+import dev.rooster.region.BlockPos
+
+val pos = BlockPos(3, 4, 5)
+pos.x                       // 3
+
+region.blockAt(pos)         // Block at (3, 4, 5) in region.world
+region.blockAt(pos).type = Material.STONE
+```
 
 ### Geometry helpers
 
