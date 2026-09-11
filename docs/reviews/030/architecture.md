@@ -81,3 +81,50 @@ new module-boundary, extendability or documentation-staleness work.
   `build.gradle.kts:27-35`. This is the same build-script duplication the 000
   round-2 review accepted for a two-module repo; it is not a module/package
   boundary, and extracting a shared build helper is not warranted by this ticket.
+
+## Round 2
+### Verdict
+The two round-1 readability fixes are internal to the README snippet and the
+root build script: they change no module, package, dependency, publication or
+task-graph edge, so the module boundaries and `docs/architecture.md`/
+`docs/design.md` remain accurate. `AGENTS.md`'s status still matches the tree,
+and committing round 1 introduced no new documentation staleness. No new
+module-boundary, extendability or doc-staleness work.
+
+### Findings
+#### No new findings.
+
+### Non-findings
+- **The README binding fix has no architectural effect.** `README.md:118-120`
+  now binds `east`/`y`/`all` to locals; it still calls the same
+  `enlarge`/`shrink` overloads and documents the same `Region` surface. No
+  package, public symbol or module map in `docs/architecture.md:12-24` or
+  `docs/design.md:33-45` is touched, so neither doc is invalidated.
+- **The `localMavenRepo` rename stays inside the root verification task.**
+  `build.gradle.kts:18-20` builds the same two candidate paths from parts, and
+  `installedPom` (`:35-38`) resolves the identical
+  `dev/rooster/region/<artifactId>/<version>/<artifactId>-<version>.pom` path. The
+  task's `dependsOn(":core:publishToMavenLocal", ":worldedit:publishToMavenLocal")`
+  (`:15`) and both installed-POM assertions (`:40-49`) are unchanged, and the task
+  is still not wired into any `check`, so `./gradlew check` still cannot write to
+  `~/.m2`. No module boundary or publication edge moved.
+- **`AGENTS.md` status remains accurate.** `AGENTS.md:87-91` still records
+  000/010/020 as done and 030 as implemented/in review, which matches the
+  committed tree (`e8fb76c`) and the fact that 030 is not yet marked done
+  (`docs/tasks/README.md:13`).
+- **No new doc staleness from the round-1 commit.** The commit added only the
+  README, the snippet test, the two build-script edits, `docs/manual-test.md`
+  MT-003 and the round-1 review reports. `docs/architecture.md`'s module map,
+  dependency paragraphs and seams, and `docs/design.md`'s decisions (including
+  the `maven-publish` to `mavenLocal` decision at `design.md:46-47`) remain
+  accurate; the round-1 review reports are point-in-time records, not canonical
+  docs, so their line references do not need to track later edits.
+- **Orchestrator-owned in-flight state — not reported.**
+  `docs/tasks/README.md:13` and the ticket frontmatter still read `todo`; as in
+  round 1 and the 000/020 reviews, that is queue state the orchestrator sets at
+  done, not staleness.
+- **Prior correctness report — concur.** I concur with
+  `docs/reviews/030/correctness.md`'s Round 2 verdict and non-findings: the README
+  binding is API/numerically correct and the `localMavenRepo` reconstruction
+  resolves the same POM paths. Neither fix raises a module-boundary or
+  documentation matter, and I do not re-report them.

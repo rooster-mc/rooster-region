@@ -87,3 +87,44 @@ not raising as work.
   imprecise but not false; I do not re-raise it. I concur with
   `docs/reviews/030/architecture.md` (no findings) on the task placement, the
   composite mapping and the `AGENTS.md`/`docs/manual-test.md` state.
+
+## Round 2
+### Verdict
+Both round-1 findings are resolved cleanly and read better than before: the
+README now binds the transform results to locals whose inline comments match the
+prose and the snippet test, and the root task's Maven directory is named for what
+it holds with the fallback path built from parts. The fixes introduce no new
+clarity, format or hygiene problem.
+
+### Findings
+#### No new findings.
+
+### Non-findings
+- **R1 resolved — the README example now reads as non-mutating.**
+  `README.md:118-120` binds `val east = region.enlarge(2, Face.EAST)`,
+  `val y = region.shrink(1, Axis.Y)` and `val all = region.enlarge(1)`, with the
+  inline comments aligned in one column and describing the bound value
+  (`maxX 17`; `minY 65, maxY 78`; every edge out by 1). That matches the prose
+  immediately below ("return a new `Region` and never mutate the receiver",
+  `:123-125`) and the assertions in `ReadmeExamplesTest.kt:39-53`, so snippet,
+  prose and test now tell the same story. The terse `y`/`all` names mirror the
+  test and are unambiguous in context.
+- **R2 resolved — the local is named for its role.**
+  `build.gradle.kts:18-20` is now `localMavenRepo`, built from
+  `System.getProperty("maven.repo.local")?.let { file(it) }` with a
+  `File(System.getProperty("user.home"), ".m2/repository")` fallback. The name no
+  longer reads like the `mavenLocal()` repository, the nested string quoting is
+  gone, and the `?:` continuation indentation follows the surrounding style.
+  `installedPom` (`:35-38`) still resolves the same path from the same `File`.
+- **No new file-hygiene or formatting issue.** The fixes touch only
+  `README.md:118-120` and `build.gradle.kts:17-20`; no trailing whitespace, no
+  tabs, and the only lines over 100 columns remain the pre-existing
+  single-string description/regex lines (`build.gradle.kts:14,27`), which
+  ktlint's `MaxLineLengthRule` skips. The test file is unchanged from round 1 and
+  remains consistent with the existing tests.
+- **Prior reports — concur.** I concur with
+  `docs/reviews/030/correctness.md`'s Round 2 verdict (the binding is
+  API/numerically correct and the rename preserves path resolution) and with
+  `docs/reviews/030/architecture.md`'s Round 2 verdict (no module, package,
+  dependency, publication or task-graph edge moved). Neither fix reopens a
+  round-1 finding, and I have nothing new to add.

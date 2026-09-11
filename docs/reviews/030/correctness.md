@@ -103,3 +103,45 @@ established in-flight convention.
   Adventure dependency and the README (`README.md:3-6,17-21`) never claims one;
   `verifyCoreDependencies` checks the direct framework/ORM/WorldEdit leaks it
   names. Nothing in the 030 change makes a false statement here.
+
+## Round 2
+### Verdict
+Both round-1 readability fixes are behaviour-preserving and correct: the README
+now binds the `enlarge`/`shrink` results exactly as `ReadmeExamplesTest.kt` does
+with the same numeric comments, and the `localMavenRepo` rename/reconstruction
+resolves the same installed-POM paths with the same assertions. No new
+correctness issues.
+
+### Findings
+#### No new findings.
+
+### Non-findings
+- **The README binding is API- and numerically correct.** `README.md:118-120`
+  now binds `val east = region.enlarge(2, Face.EAST)`,
+  `val y = region.shrink(1, Axis.Y)` and `val all = region.enlarge(1)`. The
+  overloads resolve as before (`Face`/`Axis` varargs for `east`/`y`, the
+  non-vararg `enlarge(Int)` for `all`; `Region.kt:189-205`), and the comments
+  match what the test asserts: `east.maxX == 17` (`ReadmeExamplesTest.kt:39-41`),
+  `y.minY == 65`/`y.maxY == 78` (`:43-45`), and all six edges for `all`
+  (`:47-53`). The snippet now mirrors the test's bound form, so it no longer
+  reads as mutation and agrees with the "returns a new `Region` / never mutate"
+  prose at `README.md:123-125`.
+- **The `localMavenRepo` rename preserves path resolution.** `build.gradle.kts:18-20`
+  builds `File(System.getProperty("user.home"), ".m2/repository")` when
+  `maven.repo.local` is unset and `file(it)` when it is; both branches are
+  `File`, and `installedPom` (`:35-38`) calls `resolve(...)` on it, yielding the
+  same `dev/rooster/region/<artifactId>/1.0-SNAPSHOT/<artifactId>-1.0-SNAPSHOT.pom`
+  path as round 1. The `publishToMavenLocal` dependencies (`:15`) and both
+  `check` assertions (`:40-49`) are unchanged, and `File` resolves via Gradle's
+  Kotlin DSL default imports.
+- **No new integration surface.** The commit changes only the README snippet and
+  a local variable name; the task graph, `verifyCoreDependencies`,
+  `verifyWorldEditClasspath`, the installed POMs and the composite-build
+  instructions are untouched. The working tree is clean and the round-1
+  non-findings (POM contents, composite mapping, `mavenLocal` transitivity,
+  `AGENTS.md`/`MT-003` state) still hold.
+- **Prior reports — concur.** I concur with `docs/reviews/030/readability.md`'s
+  two round-1 findings (bare transform statements; `mavenLocal` naming) and note
+  both are fixed as described above, and with
+  `docs/reviews/030/architecture.md`'s no-findings verdict. Neither change
+  alters a claim I verified in round 1.
