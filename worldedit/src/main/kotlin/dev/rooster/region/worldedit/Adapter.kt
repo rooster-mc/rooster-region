@@ -35,6 +35,7 @@ fun Player.worldEditSelection(): WERegion? {
     val localSession = manager.get(actor)
 
     val selectionWorld = localSession.selectionWorld ?: return null
+    if (selectionWorld != BukkitAdapter.adapt(this.world)) return null
     if (!localSession.isSelectionDefined(selectionWorld)) return null
     return localSession.getSelection(selectionWorld)
 }

@@ -50,7 +50,8 @@ dependency — the consumer picks WorldEdit or FAWE.
 
 - `Region` is the single public spatial type; the WorldEdit adapter converts
   to/from it so nothing else needs to know about WorldEdit.
-- `Player.worldEditSelection()` returns `null` when no selection exists, so
+- `Player.worldEditSelection()` returns `null` when no selection exists or when
+  the selection belongs to a world other than the player's current one, so
   callers never catch WorldEdit exceptions themselves.
 
 ## Conventions
