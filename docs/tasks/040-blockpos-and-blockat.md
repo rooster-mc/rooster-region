@@ -1,6 +1,6 @@
 ---
 name: BlockPos and Region.blockAt
-status: todo
+status: done
 parent: MVP
 depends-on: ["010"]
 reviewers: [tester, correctness, architecture, readability]
