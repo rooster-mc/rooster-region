@@ -85,10 +85,10 @@ Rules:
 ## Current status
 
 Tickets 000 (two-module Gradle setup), 010 (core `Region`, `Face` and geometry
-helpers), 020 (WorldEdit adapter) and 030
+helpers), 020 (WorldEdit adapter), 030
 ([`docs/tasks/030-docs-and-publish.md`](docs/tasks/030-docs-and-publish.md), the
-README, publishing and consumption work) are done. The open MVP tickets are 040
+README, publishing and consumption work), 040
 ([`docs/tasks/040-blockpos-and-blockat.md`](docs/tasks/040-blockpos-and-blockat.md),
 `BlockPos` and `Region.blockAt`) and 050
 ([`docs/tasks/050-world-scoped-selection.md`](docs/tasks/050-world-scoped-selection.md),
-world-scoped `worldEditSelection`).
+world-scoped `worldEditSelection`) are done. No MVP tickets remain.
