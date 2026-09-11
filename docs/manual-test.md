@@ -8,7 +8,7 @@ Status: `unverified` | `passed` | `failed`.
 
 | Id | Ticket | Check | Status |
 |---|---|---|---|
-| MT-001 | 020 | On a real server with FastAsyncWorldEdit (or WorldEdit), make a selection, call `Player.worldEditSelection()`, and confirm it converts to the expected `Region`; repeat with no selection and confirm `null`. | unverified |
+| MT-001 | 020 | On a real server with FastAsyncWorldEdit (or WorldEdit), make a selection, call `Player.worldEditSelection()`, and confirm it converts to the expected `Region`; repeat with no selection and with an incomplete selection (only `//pos1`, or after switching worlds) and confirm `null`. Also convert a `Region` back with `Region.toWorldEditRegion()` and confirm the cuboid's corners match the region's min/max. | unverified |
 | MT-002 | 010 | On a live server, confirm the fidelity-sensitive Bukkit members (`blocks`/`blocksArray`/`contains`/`entities`/`players`/`chunks`/`chunksFull`) behave with real chunks, block states and entity tracking (MockBukkit drives them against a mock world). | unverified |
 
 ## How to run
