@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm")
+    `java-library`
     id("org.jlleitschuh.gradle.ktlint")
     `maven-publish`
 }
@@ -17,7 +18,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
-    implementation("org.joml:joml:1.10.9")
+    api("org.joml:joml:1.10.9")
     compileOnly(kotlin("stdlib"))
 
     testImplementation(platform("org.junit:junit-bom:5.12.1"))

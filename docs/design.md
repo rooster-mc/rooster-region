@@ -34,6 +34,9 @@ without pulling in the Rooster framework, its ORM, or WorldEdit.
   matching the existing behaviour. `Face` and the geometry helpers
   (`toVector3d`, `Vector3d.toLocation`, `Box`, `value`, `Vector3d.distance`) come
   along because `Region` uses them.
+- **Deliberate API fix:** `Region.closesDistanceTo` is exposed as
+  `closestDistanceTo`; the source misspelling is corrected while the library is
+  unpublished, so there is no consumer churn.
 - **Stack:** Kotlin `2.4.20`, Java `21`, Paper API `1.21.4` (`compileOnly`),
   `joml`, JUnit 5 + MockBukkit. Matches the Rooster library family.
 - **Coordinates / naming:** group `dev.rooster.region`; artifacts
