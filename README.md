@@ -188,8 +188,9 @@ fun cuboidOf(region: Region) = region.toWorldEditRegion()
 ```
 
 `Player.worldEditSelection()` returns `null` when there is no selection, when
-only one position is set, or when a stale selection was cleared after a world
-change. It never throws for a missing selection, so callers can use `?.` instead
+only one position is set, or when the selection belongs to a world other than
+the player's current one (for example a stale selection made before a world
+change). It never throws for a missing selection, so callers can use `?.` instead
 of catching WorldEdit exceptions. The adapter targets the generic
 `com.sk89q.worldedit` API and converts a selection through its min/max points,
 so any WorldEdit region type works.
