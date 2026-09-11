@@ -90,3 +90,69 @@ expose `joml` even though JOML types are now part of its public API,
   `docs/manual-test.md:12`: MT-002's "pure math only" clause is stale given what
   `RegionTest` exercises, and I leave the wording fix with that finding rather
   than re-raising it.
+
+## Round 2
+### Verdict
+All three round-1 architecture findings are resolved in `f3ce7ac`: `core` now
+applies `java-library` and exposes `joml` via `api(...)`, `docs/architecture.md`
+records the full `toLocation` signature and the `api(joml)` scope, and
+`AGENTS.md` points at ticket 020. One documentation gap remains: the deliberate
+public-API rename `closesDistanceTo` → `closestDistanceTo` is not recorded in
+any non-review doc, so the ticket's "keep the public shape close" note now reads
+as if the surface is unchanged. No module-boundary, package-placement or
+extendability issues.
+
+### Findings
+#### 1. The deliberate `closesDistanceTo` → `closestDistanceTo` rename is unrecorded
+- Location: `core/src/main/kotlin/dev/rooster/region/Region.kt:277`;
+  `docs/tasks/010-core-region.md:50-56`; `docs/design.md:13-44`
+- Problem: readability round-1 finding 1 asked for the typo rename to be recorded
+  as a deliberate deviation from the ticket's "Keep `Region`'s public shape as
+  close to the source as possible" note. The rename landed (`Region.kt:277`), but
+  no non-review doc records it: the ticket Notes still read as if the public
+  shape is unchanged, and `docs/design.md`'s decisions list — which records other
+  deliberate deviations such as dropping `compareVectors` — does not mention it.
+  A reader of the ticket/design can no longer tell whether the name difference
+  from `rooster-core` is intentional. I am not re-raising the naming decision
+  itself (readability owns it and correctness concurred); only the missing record.
+- Suggested fix: add a Note bullet to `docs/tasks/010-core-region.md` (or a line
+  in `docs/design.md`'s decisions) recording the rename and the reason
+  (misspelling fixed while the library is unpublished, so no consumer churn).
+
+### Non-findings
+- **Round-1 finding 1 resolved.** `core/build.gradle.kts:3` applies
+  `java-library` and `:21` declares `api("org.joml:joml:1.10.9")`. The generated
+  metadata now lists `org.joml:joml` under both `apiElements` and
+  `runtimeElements`, and the POM still declares only `joml`, so consumers get the
+  JOML types on their compile classpath while the runtime classpath stays
+  `joml`-only.
+- **Round-1 finding 2 resolved.** `docs/architecture.md:20` now reads
+  `Vector3d.toLocation(world, yaw, pitch)`, matching `Geometry.kt:11-12` and the
+  ticket scope (`docs/tasks/010-core-region.md:31`).
+- **Round-1 finding 3 resolved.** `AGENTS.md:87-90` now says tickets 000 and 010
+  are implemented and in review and points at ticket 020.
+- **`core` boundary remains clean.** `core/build.gradle.kts:19-29` declares only
+  Paper API (`compileOnly`), `api(joml)`, `compileOnly(kotlin("stdlib"))` and
+  test dependencies; no Rooster, Exposed, WorldEdit or Adventure. WorldEdit/FAWE
+  stays in `worldedit/build.gradle.kts:20-23`, and no `core/src/main` source
+  references `net.kyori`, `org.jetbrains`, `com.sk89q` or `com.fastasyncworldedit`.
+- **Package placement and file layout unchanged and correct.** Sources remain
+  under `dev.rooster.region` / `dev.rooster.region.util`, matching
+  `docs/architecture.md:14-24`; the round-2 edits introduce no
+  `dev.rooster.core.region` reference and no new package or module.
+- **Round-2 code changes stay inside the boundary.** The
+  `expandBorders`/`contractBorders` split, the `enlarge(Int)`/`shrink(Int)`
+  overloads, the `intersectingAxis` block-coordinate change, the `entities`
+  `contains` filter and the `closestDistanceToAxis` absolute-value fix are all
+  internal to `Region.kt`; `api(joml)` already exposes the JOML types those
+  members use.
+- **`docs/manual-test.md` MT-002 is now accurate** (`:12`), and the `worldedit`
+  module's documented target (`docs/architecture.md:32-42`) is unchanged.
+- **Prior reports — concur.** I concur with tester round-2 finding 1 (the new
+  `entities` exclusion test is vacuous under MockBukkit's max-exclusive query
+  box) and its non-findings; it is test quality, outside my scope, so I do not
+  re-report it. I concur with correctness round 2 (no new findings; its three
+  round-1 findings are resolved and the `closestDistanceTo` rename has no
+  correctness consequence). I also concur with readability round 1's other two
+  findings; my finding 1 covers only the recording gap its finding 1 called for,
+  not the rename itself.

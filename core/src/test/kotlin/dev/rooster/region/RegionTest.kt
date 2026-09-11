@@ -341,8 +341,9 @@ class RegionTest : WorldTestSupport() {
     fun `entities excludes entities outside the region`() {
         val region = Region(location(0.0, 0.0, 0.0), location(0.0, 0.0, 0.0))
         val inside = world.spawn(location(0.0, 0.0, 0.0), Zombie::class.java)
-        val outside = world.spawn(location(1.0, 0.0, 0.0), Zombie::class.java)
+        val outside = world.spawn(location(0.5, 0.0, 0.0), Zombie::class.java)
 
+        assertFalse(region.contains(outside))
         assertEquals(1, region.entities.size)
         assertTrue(region.entities.contains(inside))
         assertFalse(region.entities.contains(outside))

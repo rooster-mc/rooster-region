@@ -90,3 +90,67 @@ claim and two public-API branches (partial `intersects`, `compareToAxis`
 - No harness path in ticket 010's scope is unreachable: every Bukkit member in
   scope is constructed under MockBukkit, so no new manual-test entry is required
   beyond correcting MT-002.
+
+## Round 2
+### Verdict
+All five round-1 findings are resolved and the tests added for the correctness
+fixes are effective, with one exception: the new `entities excludes entities
+outside the region` test is vacuous under the pinned MockBukkit, because the
+outside entity sits exactly on the query box's max face, which MockBukkit
+excludes before the production filter ever runs. That test needs one change; no
+other new test-quality issues found.
+
+### Findings
+#### 1. `entities excludes entities outside the region` cannot observe the filter it targets
+- Location: `core/src/test/kotlin/dev/rooster/region/RegionTest.kt:340-349`;
+  `core/src/main/kotlin/dev/rooster/region/Region.kt:126-138`
+- Problem: the region is the single block `(0,0,0)-(0,0,0)`, so `iterateRegion`
+  issues exactly one query, `getNearbyEntities(Location(0,0,0), 1.0, 1.0, 1.0)`.
+  In the pinned MockBukkit 4.45.0, `WorldMock.getNearbyEntities` keeps entities
+  whose location is `BoundingBox.contains(...)`; `BoundingBox.of(location, 1,1,1)`
+  builds `[loc-1, loc+1)` per axis and `contains` is `v >= min && v < max` (max
+  exclusive — verified in the bundled `WorldMock.java` and the paper-api
+  `BoundingBox` bytecode). The outside Zombie at exactly `(1.0, 0.0, 0.0)` lies
+  on the box's max X face, so it is never returned and the new
+  `contains(entity.location)` filter (`Region.kt:135`) is never asked to reject
+  anything. `region.entities` is `{inside}` whether or not the filter exists, so
+  the test would stay green if the filter were deleted and does not lock
+  correctness round-1 finding 3.
+- Suggested fix: place the outside entity strictly inside a query box but outside
+  the region. With the current single-block region, spawn it at
+  `(0.5, 0.0, 0.0)` (query box `[-1,1)`, `contains` false because `maxX = 0`);
+  or use a multi-block region such as `(0,0,0)-(10,10,10)` and spawn at
+  `(10.5, 5.0, 5.0)`. Assert both `region.entities` excludes it and
+  `region.contains(outside)` is false, so only the filter can make the test pass.
+
+### Non-findings
+- **Round-1 finding 1 resolved.** The crossing region `(-5,5,5)-(5,15,5)` is
+  added and asserted in both directions (`RegionTest.kt:118,124-125`), pinning
+  the AABB semantics against the source algorithm.
+- **Round-1 finding 2 resolved.** The tautological `distinct()` assertion is gone
+  and the test now asserts only `count { it == zombie } == 1`
+  (`RegionTest.kt:322-328`); the zombie at `(5,5,5)` is returned by several of the
+  1331 per-block queries, so de-duplication is genuinely exercised.
+- **Round-1 finding 3 resolved.** `entities filters by entity type`
+  (`RegionTest.kt:330-338`) covers the positive (`ZOMBIE` present) and negative
+  (`CREEPER` empty) filter directions.
+- **Round-1 finding 4 resolved.** `compareToAxis honours a custom box`
+  (`RegionTest.kt:369-376`) exercises the `currentBox ?: this.box` branch and
+  shows the custom box changes the classification.
+- **Round-1 finding 5 resolved.** MT-002 now names the fidelity-sensitive Bukkit
+  members and drops the "pure math only" clause (`docs/manual-test.md:12`).
+- **Tests added for the correctness fixes are effective.** `isFace(location(-0.5,
+  5.0, 5.0))` plus `intersectingAxis(...) == 0` (`RegionTest.kt:242,247`)
+  distinguish the `blockX`/floor behaviour from the old truncation, and the
+  interior `closestDistanceToAxis(Axis.X, 3.0) == 3.0` case (`:384`)
+  distinguishes the `absoluteValue` fix from the old signed `min`.
+- **No excessive or redundant tests.** The suite is 30 tests for a 310-line
+  class; `blocks`/`blocksArray` assertions remain adequate and not brittle, and
+  no test asserts on iteration order or other refactor-sensitive detail.
+- **No new harness limit beyond the corrected MT-002.** The `getNearbyEntities`
+  max-exclusive behaviour in finding 1 is a harness quirk, not a reason for a
+  further manual-test entry: MT-002 already sends `entities` to a live server.
+- **Concur with the other round-1 reports.** Correctness findings 1-3 are fixed
+  and now have tests (except the exclusion test in finding 1 above); architecture
+  finding 1 (`api(joml)`) and readability findings 1-3 are implemented and do not
+  raise test-quality work. I do not re-report any of them.

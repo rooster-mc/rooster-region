@@ -52,5 +52,7 @@ dependency.
   can swap imports with minimal churn.
 - `Vector3dHelper.compareVectors` is deliberately dropped; it is localization,
   not geometry.
+- `Region.closesDistanceTo` is renamed to `closestDistanceTo` (the source typo
+  is fixed); the library is unpublished, so there is no consumer churn.
 - If MockBukkit cannot construct a `World`/`Block` for a member, test the
   arithmetic instead and record a manual-test entry.

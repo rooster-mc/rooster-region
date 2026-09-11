@@ -110,3 +110,68 @@ is not.
 - Prior findings: I concur with all five tester findings (crossing-overlap test,
   tautological `distinct` assertion, missing negative filter case, untested
   `customBox`, MT-002 wording). I have not re-reported them.
+
+## Round 2
+### Verdict
+All three round-1 correctness findings are resolved and verified against the
+current tree, and the round-1 refactors/renames introduce no new logic, math or
+integration defects. I have no new findings; I concur with the tester's round-2
+finding that the new `entities` exclusion test cannot observe the filter it
+targets (a test-quality issue, not a production defect).
+
+### Findings
+No new findings. The three round-1 correctness findings are resolved in
+`f3ce7ac`, and the tests added for them are effective apart from the vacuous
+`entities` exclusion test the tester owns.
+
+### Non-findings
+- **Round-1 finding 1 resolved.** `intersectingAxis` now compares
+  `location.blockX/blockY/blockZ` against the region bounds
+  (`Region.kt:259-261`) instead of `Double.toInt()`. The floor semantics fix the
+  negative-coordinate truncation; `isFace(location(-0.5, 5.0, 5.0))` is now
+  `false` and `intersectingAxis(...)` is `0` (`RegionTest.kt:242,247`). The
+  `contains(region, allowEdges)` cases still pass because integer coordinates
+  classify identically.
+- **Round-1 finding 2 resolved.** `closestDistanceToAxis` returns
+  `minOf(distanceEdge1.absoluteValue, distanceEdge2.absoluteValue)`
+  (`Region.kt:288`), which is the true nearest-edge distance for interior,
+  before-min and after-max values, and works for reversed edges too. The interior
+  case `closestDistanceToAxis(Axis.X, 3.0) == 3.0` and the outside case `15.0 →
+  5.0` are both asserted (`RegionTest.kt:384-385`).
+- **Round-1 finding 3 resolved in production.** `entities` now filters with
+  `contains(entity.location)` (`Region.kt:135`), so entities outside the
+  continuous region box are dropped. I concur with tester round-2 finding 1 that
+  the test at `RegionTest.kt:340-349` is vacuous: I confirmed independently that
+  paper-api's `BoundingBox.contains(Vector)` is max-exclusive
+  (`org/bukkit/util/BoundingBox.java:757-761`) and MockBukkit 4.45.0's
+  `WorldMock.getNearbyEntities(Location,double,double,double,Predicate)` builds
+  `BoundingBox.of(location, x, y, z)` and filters with `contains`, so the outside
+  Zombie at exactly `(1.0, 0.0, 0.0)` is discarded by the harness before the
+  production filter runs. The production filter itself is correct; the fix is to
+  the test's entity placement, as the tester says.
+- **`enlarge`/`shrink` overloads and `expandBorders`/`contractBorders` refactor
+  are correct.** The new one-argument overloads (`Region.kt:189,198`) resolve the
+  former `enlarge(1)` ambiguity additively; `contractBorders` negating the amount
+  before `changeBorders` preserves the round-1 semantics (positive faces move
+  `maxEdge`, negative faces move `minEdge`), and the all-faces default still
+  applies when no faces are passed (`RegionTest.kt:204-222`).
+- **Rename `closesDistanceTo` → `closestDistanceTo`.** This is a deliberate,
+  documented deviation from the ticket's "keep the public shape close" note
+  (readability round-1 finding 1). It is a naming decision owned by readability
+  with no correctness consequence; I concur and do not re-raise it.
+- **`api(joml)` + `java-library`.** The integration contract is now correct for
+  consumers (JOML types are on `core`'s public API), and `core`'s runtime
+  classpath stays `joml`-only. No correctness impact.
+- **`entities`/`contains` model note.** Filtering by `contains` makes `entities`
+  consistent with `contains(entity)`, so an entity in the outer half of a
+  max-side boundary block is excluded. That follows from the continuous-box
+  `contains` semantics the ticket's own test pins (`RegionTest.kt:75` asserts
+  `contains(10.5, 5, 5)` is false), so it is not a new defect; the alternative
+  (block membership) would make `entities` disagree with `contains(entity)`.
+- **No new issues in the untouched paths.** `intersects`, `blocksArray`,
+  `isChunkFullyContained`, `chunks`/`chunksFull`, `compareToAxis`,
+  `closestDistanceTo`, `edges`, `Face`, `Geometry.kt` and `Vector3dMath.kt` are
+  unchanged from the round-1 tree I reviewed and remain correct.
+- **Prior report — concur.** I concur with the tester's round-2 findings and
+  non-findings (the only new item, test vacuity, is outside my scope) and do not
+  re-report any of them.

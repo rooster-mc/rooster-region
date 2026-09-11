@@ -82,3 +82,47 @@ incantations at call sites.
   re-report them; in particular I agree with correctness's note that
   `closesDistanceTo` is source-faithful, which is why finding 1 frames the typo
   as a naming decision rather than a defect in the port.
+
+## Round 2
+### Verdict
+All three round-1 readability findings are resolved in `f3ce7ac`: the misspelled
+helper is now `closestDistanceTo`, `changeBorders` no longer takes an ambiguous
+boolean (the `expandBorders`/`contractBorders` split names the direction), and
+one-argument `enlarge(Int)`/`shrink(Int)` overloads let call sites drop the
+`*emptyArray<Face>()` incantation. The round-2 edits are formatting-clean and add
+no new readability issues, so I have no new findings.
+
+### Findings
+No new findings. The changed code is followable, the new overloads read cleanly,
+and formatting still conforms: no line over 100 columns, no tabs, no trailing
+whitespace, no comments, and every file ends with a newline.
+
+### Non-findings
+- **Round-1 finding 1 resolved.** `closesDistanceTo` is renamed to
+  `closestDistanceTo` (`core/src/main/kotlin/dev/rooster/region/Region.kt:277`),
+  now consistent with `closestDistanceToAxis`, and the two test call sites and the
+  test name are updated (`RegionTest.kt:379,382-383`). I concur with architecture
+  round-2 finding 1 that the deliberate rename should be recorded in a non-review
+  doc; that record is architecture's scope, so I do not re-report it.
+- **Round-1 finding 2 resolved.** `changeBorders` now takes a signed `shift: Int`
+  (`Region.kt:213`) with no boolean flag, and the direction is named by
+  `expandBorders`/`contractBorders` (`Region.kt:207-211`); the `enlarge`/`shrink`
+  overloads call those directly, so no call site reads as a bare `true`/`false`.
+- **Round-1 finding 3 resolved.** The one-argument `enlarge(amount: Int)`
+  (`Region.kt:189`) and `shrink(amount: Int)` (`Region.kt:198`) overloads
+  disambiguate the zero-vararg case, and the test now calls `region.enlarge(1)` /
+  `region.shrink(1)` (`RegionTest.kt:207,215`) instead of
+  `*emptyArray<Face>()`.
+- **Formatting and hygiene unchanged.** No line exceeds 100 columns in main or
+  test sources, there are no tabs or trailing whitespace, every file ends with a
+  newline, and no comments were added. `import kotlin.math.absoluteValue` sits
+  last in `Region.kt:15`, consistent with ktlint's trailing `kotlin` import group.
+- **New code reads cleanly.** The signed `shift` is applied once per face via
+  `faceShift` (`Region.kt:219`), the three overload families sit adjacent in
+  `enlarge`/`shrink` order, and nothing new is indirect or dead.
+- **Prior reports — concur.** I concur with tester round-2 finding 1 (the new
+  `entities` exclusion test is vacuous under MockBukkit's max-exclusive query
+  box) and correctness round 2 (no new findings); both are outside the
+  readability column, so I do not re-report them. I concur with architecture
+  round-2 finding 1 on the unrecorded rename and leave the recording to that
+  scope.
