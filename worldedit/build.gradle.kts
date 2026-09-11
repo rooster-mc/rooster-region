@@ -35,6 +35,8 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.45.0")
+    testImplementation(platform("com.intellectualsites.bom:bom-newest:1.52"))
+    testImplementation("com.fastasyncworldedit:FastAsyncWorldEdit-Core")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

@@ -37,8 +37,11 @@ dev.rooster.region.worldedit
                        BlockVector3.toLocation(world), Player.worldEditSelection()
 ```
 
-Depends on `project(":core")` and the WorldEdit API (`compileOnly`, via the
-FAWE artifacts that implement it). No `plugin.yml`, no hard FAWE runtime
+Depends on `api(project(":core"))`, `compileOnly(paper-api)`, the WorldEdit API
+(`compileOnly`, via the FAWE artifacts that implement it), and
+`compileOnly(kotlin("stdlib"))`. The same `kotlin.stdlib.default.dependency=false`
+property (`gradle.properties`) keeps stdlib out of the published POM, so
+consumers provide it at runtime. No `plugin.yml`, no hard FAWE runtime
 dependency — the consumer picks WorldEdit or FAWE.
 
 ## Seams

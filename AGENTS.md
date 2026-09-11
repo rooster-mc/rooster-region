@@ -85,6 +85,8 @@ Rules:
 ## Current status
 
 Tickets 000 (two-module Gradle setup) and 010 (core `Region`, `Face` and
-geometry helpers) are implemented and in review. Next is ticket
+geometry helpers) are done. Ticket
 [`docs/tasks/020-worldedit-adapter.md`](docs/tasks/020-worldedit-adapter.md), the
-WorldEdit adapter in the `worldedit` module.
+WorldEdit adapter in the `worldedit` module, is implemented and in review. Next is
+ticket [`docs/tasks/030-docs-and-publish.md`](docs/tasks/030-docs-and-publish.md),
+the README, publishing and consumption work.
