@@ -3,6 +3,7 @@ package dev.rooster.region
 import dev.rooster.region.util.Box
 import org.bukkit.Axis
 import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.WorldCreator
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Zombie
@@ -12,6 +13,7 @@ import org.mockbukkit.mockbukkit.MockBukkit
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class RegionTest : WorldTestSupport() {
@@ -292,6 +294,36 @@ class RegionTest : WorldTestSupport() {
 
         val negative = Region(location(-16.0, 0.0, -16.0), location(-1.0, 0.0, -1.0))
         assertEquals(setOf(-1 to -1), negative.chunksFull.map { it.x to it.z }.toSet())
+    }
+
+    @Test
+    fun `blockAt returns the block at the given position`() {
+        val region = Region(location(0.0, 0.0, 0.0), location(10.0, 10.0, 10.0))
+
+        val block = region.blockAt(BlockPos(3, 4, 5))
+
+        assertEquals(3, block.x)
+        assertEquals(4, block.y)
+        assertEquals(5, block.z)
+        assertEquals(world, block.world)
+    }
+
+    @Test
+    fun `blockAt addresses the region world`() {
+        val otherWorld = MockBukkit.getMock()!!.createWorld(WorldCreator("other"))!!
+        val region =
+            Region(
+                Location(otherWorld, 0.0, 0.0, 0.0),
+                Location(otherWorld, 10.0, 10.0, 10.0),
+            )
+
+        val block = region.blockAt(BlockPos(3, 4, 5))
+        assertEquals(otherWorld, block.world)
+
+        block.type = Material.STONE
+
+        assertEquals(Material.STONE, otherWorld.getBlockAt(3, 4, 5).type)
+        assertNotEquals(Material.STONE, world.getBlockAt(3, 4, 5).type)
     }
 
     @Test

@@ -14,7 +14,9 @@ rooster-region/
 ```
 dev.rooster.region
   Region.kt            two Location edges -> min/max, size, iteration, contains,
-                       intersects, enlarge/shrink, chunk math, blocks/entities
+                       intersects, enlarge/shrink, chunk math, blocks/entities,
+                       blockAt(BlockPos)
+  BlockPos.kt          pure integer block position, Comparable by x, then y, then z
   Face.kt              TOP/BOTTOM/WEST/EAST/NORTH/SOUTH over Bukkit Axis
 dev.rooster.region.util
   Geometry.kt          Location.toVector3d(), Vector3d.toLocation(world, yaw, pitch),

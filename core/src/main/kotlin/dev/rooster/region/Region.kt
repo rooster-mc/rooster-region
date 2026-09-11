@@ -100,6 +100,8 @@ class Region(
             minZ <= region.maxZ &&
             region.minZ <= maxZ
 
+    fun blockAt(position: BlockPos): Block = world.getBlockAt(position.x, position.y, position.z)
+
     val blocks: List<Block>
         get() {
             return iterateRegion { x, y, z ->

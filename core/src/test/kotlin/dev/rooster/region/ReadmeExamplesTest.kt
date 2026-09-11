@@ -8,6 +8,7 @@ import dev.rooster.region.util.toVector3d
 import dev.rooster.region.util.value
 import org.bukkit.Axis
 import org.bukkit.Location
+import org.bukkit.Material
 import org.joml.Vector3d
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -51,6 +52,23 @@ class ReadmeExamplesTest : WorldTestSupport() {
         assertEquals(80, all.maxY)
         assertEquals(-1, all.minZ)
         assertEquals(16, all.maxZ)
+    }
+
+    @Test
+    fun `block positions example compiles and behaves as documented`() {
+        val region = Region(location(0.0, 64.0, 0.0), location(15.0, 79.0, 15.0))
+
+        val pos = BlockPos(3, 4, 5)
+        assertEquals(3, pos.x)
+
+        val block = region.blockAt(pos)
+        assertEquals(3, block.x)
+        assertEquals(4, block.y)
+        assertEquals(5, block.z)
+        assertEquals(world, block.world)
+
+        block.type = Material.STONE
+        assertEquals(Material.STONE, world.getBlockAt(3, 4, 5).type)
     }
 
     @Test
