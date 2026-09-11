@@ -77,3 +77,45 @@ No tests were added, so there are no new excessive or brittle tests to report.
   that neither adds the manual entry finding 1 asks for.
 - **No prior reports in this round to concur with or dissent from** — tester is
   first in the 050 reviewer list (`docs/tasks/050-world-scoped-selection.md:6`).
+
+## Round 2
+
+### Verdict
+Round 1 finding 1 is resolved: `MT-004` names ticket 050, covers both of its
+non-automatable acceptance criteria (selection in world A, player moves to world
+B → `null`, back to world A → unchanged), is marked `unverified`, and the harness
+reason is recorded in `## How to run`. The round-2 commits change no source or
+test file, so nothing test-related regressed and there is no new test-quality or
+harness-fidelity work.
+
+### Findings
+#### No new findings.
+
+### Non-findings
+- **Round 1 finding 1 is resolved as requested.** `docs/manual-test.md:14` adds
+  `MT-004 | 050` with exactly the two-sided check (world A → world B → `null`;
+  back → unchanged), and `docs/manual-test.md:20-23` records the reason ("requires
+  a live WorldEdit/FAWE plugin and session: under MockBukkit `BukkitAdapter` is
+  absent from the test classpath and its enum initializer needs
+  `WorldEditPlugin.getInstance()`"), satisfying the manual gate's
+  entry-names-the-ticket requirement (`docs/workflow.md:65-75`). The reason lives
+  in the `## How to run` prose rather than a table column, matching the MT-003
+  precedent (`docs/manual-test.md:13,18-20`); the table's lack of a `Reason`
+  column remains a pre-existing format choice, not new work for this ticket.
+- **No test file changed anywhere on the branch.** `git diff main...HEAD --
+  '*/src/test/*'` is empty and `ec0445e..HEAD` (the round-2 commits) touches no
+  `.kt` or `.kts` file, so `AdapterTest.kt` is byte-for-byte the round-1 suite.
+  There is no new test to judge as excessive, brittle, or mis-layered, and none
+  was removed.
+- **The README fix does not disturb any test.** The architecture finding's fix at
+  `README.md:190-194` is prose; the runnable snippet above it
+  (`README.md:184-185`, `player.worldEditSelection()?.toRegion(player.world)`) is
+  unchanged, so `ReadmeExamplesTest` is unaffected and the WorldEdit example
+  remains correctly excluded and gated by `MT-001`/`MT-004`.
+- **The MT-004 check is a good manual test, not a stiff or ambiguous one.** It
+  asserts observable public behaviour at both ends of the transition and does not
+  pin an implementation detail (e.g. it does not name `BukkitAdapter` or
+  `selectionWorld`), so it survives internal refactors of the guard.
+- **No earlier report in this round to concur with or dissent from** — tester is
+  again first in the 050 reviewer list
+  (`docs/tasks/050-world-scoped-selection.md:6`).

@@ -78,3 +78,55 @@ world-mismatch behaviour this ticket exists to provide.
 - **Correctness verdict — concur.** Its no-findings conclusion is about logic
   and API fit and raises no module/package or documentation matter beyond the
   README item I report above.
+
+## Round 2
+
+### Verdict
+My Round 1 README finding is resolved and `AGENTS.md`'s "Current status" is
+still correct. The round-2 commits are documentation-only; the branch as a whole
+changes exactly one production line inside `worldedit`, so `core`'s boundary,
+the package layout, and the generic-API rule all remain intact. No new
+module-boundary or documentation-staleness work.
+
+### Findings
+No new findings within scope.
+
+### Non-findings
+- **Round 1 finding 1 resolved.** `README.md:190-194` now reads "returns `null`
+  when there is no selection, when only one position is set, or when the
+  selection belongs to a world other than the player's current one (for example a
+  stale selection made before a world change)", which matches the guard at
+  `Adapter.kt:38`. The runnable example (`README.md:184-185`) is unchanged and
+  its `?.` still absorbs the new `null`, so the documented contract and the
+  sample agree with the code.
+- **`AGENTS.md` "Current status" is still correct.** `AGENTS.md:87-94` lists 000,
+  010, 020, 030, 040 and 050 as done, keeps 040 in the done list (path
+  `docs/tasks/040-blockpos-and-blockat.md`, `BlockPos`/`Region.blockAt`) and 050
+  with its path (`docs/tasks/050-world-scoped-selection.md`, world-scoped
+  `worldEditSelection`), and ends "No MVP tickets remain." No edit needed.
+- **Module boundaries intact across the branch.** `git diff main...HEAD
+  --name-only` is `AGENTS.md`, `README.md`, `docs/architecture.md`,
+  `docs/manual-test.md`, the three `docs/reviews/050/*` files and
+  `worldedit/src/main/kotlin/dev/rooster/region/worldedit/Adapter.kt` — no file
+  under `core/`, no `build.gradle.kts`, no `gradle.properties`. `core` keeps its
+  `compileOnly(paper-api)`/`api(joml)`/`compileOnly(kotlin("stdlib"))` classpath
+  and the `verifyCoreDependencies`/`verifyWorldEditClasspath` guards are
+  untouched.
+- **The one source line stays generic and inside `worldedit`.** The branch's only
+  code delta is `Adapter.kt:38` from `207d012`; the round-2 commits
+  (`ec0445e..HEAD`) touch only README, manual-test and review files. `Adapter.kt`
+  still imports only `com.sk89q.worldedit.*` and introduces no
+  `com.fastasyncworldedit.*` class, matching `docs/design.md:23-27`.
+- **`docs/manual-test.md` addition is consistent with the docs I own.** `MT-004`
+  (`docs/manual-test.md:14`) names ticket 050 and both world-scoping acceptance
+  criteria, and `docs/architecture.md:53-55` continues to describe the same
+  contract; no architecture doc contradicts it.
+- **`docs/tasks/README.md:15` and the 050 frontmatter still read `todo` — not
+  doc staleness.** That remains the orchestrator-owned in-flight queue state
+  until step 8 marks the ticket done (`docs/workflow.md:51`), as in Round 1.
+- **Tester Round 2 — out of my scope, concur, not re-reported.** Its resolution
+  of the manual-test finding asserts no module/package or architecture-doc
+  defect, so I add nothing to it.
+- **Correctness Round 2 — concur.** Its no-findings verdict rests on the
+  implementation being unchanged since Round 1 and the README now matching the
+  code; neither raises a new boundary or documentation matter.

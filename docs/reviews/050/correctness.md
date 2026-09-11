@@ -66,3 +66,42 @@ None.
   `AGENTS.md:91` says all MVP tickets are done while
   `docs/tasks/README.md:15` still shows 050 as `todo`. Those are doc-staleness
   items for `architecture`, not correctness.
+
+## Round 2
+
+### Verdict
+The implementation is unchanged since Round 1: the only source delta on the
+branch is still the single guard at `Adapter.kt:38` from `207d012`, and the
+round-2 commits (`ec0445e..HEAD`) touch only `README.md`, `docs/manual-test.md`
+and review files. The README now states the world-mismatch case, matching the
+code, so my Round 1 "no findings" verdict stands. No new correctness work.
+
+### Findings
+None.
+
+### Non-findings
+- **Implementation unchanged — confirmed.** `git diff 207d012..HEAD --
+  worldedit/src/main/kotlin/dev/rooster/region/worldedit/Adapter.kt` is empty,
+  `git diff main...HEAD` still shows exactly one added line in `Adapter.kt`, and
+  `git diff ec0445e..HEAD --name-only` contains no `.kt`/`.kts` file. All Round 1
+  reasoning (world comparison via `BukkitWorld.equals`, ordering after the
+  `selectionWorld == null` guard and before `isSelectionDefined`, same-world
+  fall-through, unchanged `toRegion(world)`) therefore still applies verbatim; I
+  do not repeat it as findings.
+- **The README contract now matches the implementation.** The round-2 edit
+  (`README.md:190-194`) replaces the vague "a stale selection was cleared after a
+  world change" with "the selection belongs to a world other than the player's
+  current one (for example a stale selection made before a world change)", which
+  is exactly what `Adapter.kt:38` does. The runnable example
+  (`README.md:184-185`) is unchanged and its `?.` still absorbs the new `null`, so
+  no caller-facing contract regressed.
+- **No source or test change means no new logic/API surface to review.** The
+  round-2 commits are documentation only, so there is no new math, nullability,
+  adapter-conversion or caller-integration behaviour to assess.
+- **The tester's Round 2 report is outside correctness scope and I take no
+  position on it.** It resolves the manual-test-entry finding and judges no test
+  code; nothing in it asserts a logic or API defect I would need to concur with or
+  dissent from.
+- **Round 1's documentation-scope notes are resolved.** The README staleness
+  noted at Round 1 is fixed, and the `AGENTS.md`/task-index status drift was
+  already handled by `ec0445e`; neither is a correctness matter.
