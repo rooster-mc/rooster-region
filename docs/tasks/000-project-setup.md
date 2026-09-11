@@ -1,6 +1,6 @@
 ---
 name: Gradle setup for core and worldedit modules
-status: todo
+status: done
 parent: MVP
 depends-on: []
 reviewers: [tester, correctness, architecture, readability]
