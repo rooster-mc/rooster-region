@@ -84,7 +84,7 @@ Rules:
 
 ## Current status
 
-Ticket 000 (two-module Gradle setup) is implemented and in review: `core` and
-`worldedit` build, test, format and publish. Next is ticket
-[`docs/tasks/010-core-region.md`](docs/tasks/010-core-region.md), which ports
-`Region`, `Face` and the geometry helpers into `core`.
+Tickets 000 (two-module Gradle setup) and 010 (core `Region`, `Face` and
+geometry helpers) are implemented and in review. Next is ticket
+[`docs/tasks/020-worldedit-adapter.md`](docs/tasks/020-worldedit-adapter.md), the
+WorldEdit adapter in the `worldedit` module.

@@ -17,13 +17,13 @@ dev.rooster.region
                        intersects, enlarge/shrink, chunk math, blocks/entities
   Face.kt              TOP/BOTTOM/WEST/EAST/NORTH/SOUTH over Bukkit Axis
 dev.rooster.region.util
-  Geometry.kt          Location.toVector3d(), Vector3d.toLocation(world),
+  Geometry.kt          Location.toVector3d(), Vector3d.toLocation(world, yaw, pitch),
                        typealias Box = Pair<Vector3d, Vector3d>, Box.region(world),
                        Location.value(axis), Vector3d.value(axis)
   Vector3dMath.kt      Vector3d.distance(other) (infix)
 ```
 
-Dependencies: `compileOnly(paper-api)`, `implementation(joml)`,
+Dependencies: `compileOnly(paper-api)`, `api(joml)`,
 `compileOnly(kotlin("stdlib"))`. The `kotlin.stdlib.default.dependency=false`
 property (`gradle.properties`) keeps stdlib out of the published POM, so
 consumers provide it at runtime. No Rooster, no Exposed, no WorldEdit, no
