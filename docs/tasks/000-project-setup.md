@@ -45,3 +45,38 @@ publishes, so the region code can be ported into it.
   `rooster-ui/settings.gradle.kts` (composite), `rooster-monolith/worldedit`
   (WorldEdit deps + BOM).
 - Keep the `worldedit` module free of a `plugin.yml`; it is a library.
+- Version deviations (resolved against the installed Gradle `9.7.0`):
+  - Kotlin `2.4.20` instead of `2.2.0`: Kotlin 2.2.0 predates Gradle 9 and
+    cannot configure a Gradle 9.7 build.
+  - ktlint Gradle plugin `14.2.0` (the ticket did not pin a version).
+  - MockBukkit `4.45.0`: the last `mockbukkit-v1.21` release built against
+    Paper `1.21.4-R0.1-SNAPSHOT`; later 4.x releases target 1.21.5+.
+  - JUnit `5.12.1` via `org.junit:junit-bom`, matching MockBukkit's
+    `junit-jupiter`.
+  - joml `1.10.9`; WorldEdit BOM `com.intellectualsites.bom:bom-newest:1.52`
+    (resolves from Maven Central and pins FAWE `2.12.3`).
+- `kotlin.stdlib.default.dependency=false` plus `compileOnly(kotlin("stdlib"))`
+  keeps the published `rooster-region` POM to `joml` only, as required.
+- `paper-api` is also a `testImplementation` because MockBukkit needs it at test
+  runtime; neither it nor Adventure appears in any published POM.
+- The wrapper was bootstrapped from the reference wrapper: the system Gradle
+  distribution (`GRADLE_HOME=/usr/share/java/gradle`) is missing modules, so
+  `gradle wrapper` cannot run in this environment.
+- Toolchain additions beyond the scope:
+  - `settings.gradle.kts` applies `org.gradle.toolchains.foojay-resolver-convention`
+    `0.8.0` so `jvmToolchain(21)` can locate or download a JDK 21.
+  - `gradle.properties` sets `org.gradle.jvmargs=-Xmx2g` for the build daemon.
+- `worldedit` applies the IntellectualSites BOM as `compileOnly` so its
+  constraints reach only the compile classpath, and marks
+  `FastAsyncWorldEdit-Bukkit` `isTransitive = false` because only its
+  `com.sk89q.worldedit.bukkit` API is needed; neither leaks into a published POM.
+- Smoke coverage: `core` has `ClasspathSmokeTest` (forbidden FQCNs absent) and
+  `MockBukkitHarnessTest` (pinned MockBukkit boots), and the `check`-bound
+  `verifyCoreDependencies` task asserts the generated POM and `runtimeClasspath`
+  are `joml`-only and that `compileClasspath` has no WorldEdit/Exposed/Rooster
+  leak. `worldedit` has `WorldEditCompileClasspathTest` (WorldEdit absent at
+  runtime) plus the `check`-bound `verifyWorldEditClasspath` task, which resolves
+  the FAWE/BOM compile classpath and asserts the FAWE-Core jar ships
+  `com.sk89q.worldedit.regions.CuboidRegion`.
+- Symbol-level exercise of `worldedit`'s `api(project(":core"))` is deferred to
+  ticket 020: `core` has no public symbol to reference until ticket 010 lands.

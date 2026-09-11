@@ -23,8 +23,11 @@ dev.rooster.region.util
   Vector3dMath.kt      Vector3d.distance(other) (infix)
 ```
 
-Dependencies: `compileOnly(paper-api)`, `implementation(joml)`. No Rooster, no
-Exposed, no WorldEdit, no Adventure.
+Dependencies: `compileOnly(paper-api)`, `implementation(joml)`,
+`compileOnly(kotlin("stdlib"))`. The `kotlin.stdlib.default.dependency=false`
+property (`gradle.properties`) keeps stdlib out of the published POM, so
+consumers provide it at runtime. No Rooster, no Exposed, no WorldEdit, no
+Adventure.
 
 ## worldedit
 

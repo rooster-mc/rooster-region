@@ -18,7 +18,7 @@ Read these before working:
 
 ## Stack
 
-Kotlin `2.2.0`, Java `21`, Gradle Kotlin DSL. Paper API `1.21.4`
+Kotlin `2.4.20`, Java `21`, Gradle Kotlin DSL. Paper API `1.21.4`
 (`compileOnly`), `joml`, WorldEdit API (`compileOnly`, in the `worldedit`
 module), JUnit 5 + MockBukkit. Full rationale in `docs/design.md`.
 
@@ -86,5 +86,7 @@ Rules:
 
 ## Current status
 
-Planning/setup only. No code has been written yet. Start with ticket
-[`docs/tasks/000-project-setup.md`](docs/tasks/000-project-setup.md).
+Ticket 000 (two-module Gradle setup) is implemented and in review: `core` and
+`worldedit` build, test, format and publish. Next is ticket
+[`docs/tasks/010-core-region.md`](docs/tasks/010-core-region.md), which ports
+`Region`, `Face` and the geometry helpers into `core`.

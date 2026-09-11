@@ -15,7 +15,9 @@ without pulling in the Rooster framework, its ORM, or WorldEdit.
 - **Standalone core.** The `core` module must be importable without
   `rooster-core`, without the Rooster framework, and without any ORM/Exposed
   (`rooster-sql`/`RoosterDb`). It depends only on the Bukkit API (`compileOnly`)
-  and `joml`.
+  and `joml`. Kotlin stdlib is also `compileOnly`
+  (`kotlin.stdlib.default.dependency=false`), keeping the published POM
+  `joml`-only; consumers supply stdlib at runtime.
 - **No geometry/bukkit split.** Geometry helpers and the Bukkit `Region` live in
   the same `core` module. Splitting them adds friction for no benefit today.
 - **WorldEdit is optional and separate.** The WE bridge lives in its own
@@ -32,7 +34,7 @@ without pulling in the Rooster framework, its ORM, or WorldEdit.
   matching the existing behaviour. `Face` and the geometry helpers
   (`toVector3d`, `Vector3d.toLocation`, `Box`, `value`, `Vector3d.distance`) come
   along because `Region` uses them.
-- **Stack:** Kotlin `2.2.0`, Java `21`, Paper API `1.21.4` (`compileOnly`),
+- **Stack:** Kotlin `2.4.20`, Java `21`, Paper API `1.21.4` (`compileOnly`),
   `joml`, JUnit 5 + MockBukkit. Matches the Rooster library family.
 - **Coordinates / naming:** group `dev.rooster.region`; artifacts
   `rooster-region` (core) and `rooster-region-worldedit`; packages
