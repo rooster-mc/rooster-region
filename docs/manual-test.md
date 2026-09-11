@@ -13,5 +13,6 @@ Status: `unverified` | `passed` | `failed`.
 
 ## How to run
 
-These require a Paper server with a WorldEdit implementation loaded. There is no
-run server in this library repo; verify from a consumer plugin's dev server.
+MT-001 requires a Paper server with a WorldEdit implementation loaded; MT-002
+only needs a Paper server. There is no run server in this library repo; verify
+from a consumer plugin's dev server.

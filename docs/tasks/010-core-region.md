@@ -1,6 +1,6 @@
 ---
 name: Core region, face, and geometry helpers
-status: todo
+status: done
 parent: MVP
 depends-on: ["000"]
 reviewers: [tester, correctness, architecture, readability]
