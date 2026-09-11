@@ -1,6 +1,6 @@
 ---
 name: WorldEdit adapter module
-status: todo
+status: done
 parent: MVP
 depends-on: ["010"]
 reviewers: [tester, correctness, architecture]
