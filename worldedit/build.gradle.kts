@@ -50,12 +50,29 @@ tasks.test {
 
 tasks.register("verifyWorldEditClasspath") {
     group = "verification"
-    description = "Asserts the WorldEdit API is on the compile classpath only."
+    description =
+        "Asserts the published POM exposes core only and the WorldEdit API is on the compile classpath only."
+    dependsOn(tasks.named("generatePomFileForMavenPublication"))
 
+    val pomFile = layout.buildDirectory.file("publications/maven/pom-default.xml")
     val compileClasspath = configurations.named("compileClasspath")
     val runtimeClasspath = configurations.named("runtimeClasspath")
 
     doLast {
+        val pomText = pomFile.get().asFile.readText()
+        val dependencyPattern =
+            Regex(
+                "<dependency>\\s*<groupId>([^<]+)</groupId>\\s*<artifactId>([^<]+)</artifactId>",
+            )
+        val pomDependencies =
+            dependencyPattern
+                .findAll(pomText)
+                .map { "${it.groupValues[1]}:${it.groupValues[2]}" }
+                .toList()
+        check(pomDependencies == listOf("dev.rooster.region:rooster-region")) {
+            "rooster-region-worldedit POM must declare only core but declares $pomDependencies"
+        }
+
         // allComponents includes this project's own component, which is not a
         // dependency and must not be compared against the expected lists.
         fun externalModuleNames(

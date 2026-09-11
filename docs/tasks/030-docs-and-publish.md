@@ -1,6 +1,6 @@
 ---
 name: README, publishing, and consumption
-status: todo
+status: done
 parent: MVP
 depends-on: ["000", "010", "020"]
 reviewers: [correctness, architecture, readability]
