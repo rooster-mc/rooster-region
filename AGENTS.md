@@ -85,7 +85,7 @@ Rules:
 ## Current status
 
 Tickets 000 (two-module Gradle setup), 010 (core `Region`, `Face` and geometry
-helpers) and 020 (WorldEdit adapter) are done. Ticket
-[`docs/tasks/030-docs-and-publish.md`](docs/tasks/030-docs-and-publish.md), the
-README, publishing and consumption work, is implemented and in review. It is the
-last ticket in the MVP queue; once it is done there is no next ticket.
+helpers), 020 (WorldEdit adapter) and 030
+([`docs/tasks/030-docs-and-publish.md`](docs/tasks/030-docs-and-publish.md), the
+README, publishing and consumption work) are done. Ticket 030 was the last
+ticket in the MVP queue; there is no next ticket.
