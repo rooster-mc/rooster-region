@@ -1,6 +1,6 @@
 ---
 name: World-scoped worldEditSelection
-status: todo
+status: done
 parent: MVP
 depends-on: ["020"]
 reviewers: [tester, correctness, architecture]

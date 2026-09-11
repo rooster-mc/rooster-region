@@ -11,10 +11,14 @@ Status: `unverified` | `passed` | `failed`.
 | MT-001 | 020 | On a real server with FastAsyncWorldEdit (or WorldEdit), make a selection, call `Player.worldEditSelection()`, and confirm it converts to the expected `Region`; repeat with no selection and with an incomplete selection (only `//pos1`, or after switching worlds) and confirm `null`. Also convert a `Region` back with `Region.toWorldEditRegion()` and confirm the cuboid's corners match the region's min/max. | unverified |
 | MT-002 | 010 | On a live server, confirm the fidelity-sensitive Bukkit members (`blocks`/`blocksArray`/`contains`/`entities`/`players`/`chunks`/`chunksFull`) behave with real chunks, block states and entity tracking (MockBukkit drives them against a mock world). | unverified |
 | MT-003 | 030 | Build a throwaway consumer plugin against the README examples twice — once resolving the published coordinates from `mavenLocal` (after `just publish`) and once through a Gradle composite build (`includeBuild`/substitution) — and confirm both compile and load; then run it on a Paper server with WorldEdit/FAWE and confirm `Player.worldEditSelection()` follows the documented `null` contract (see MT-001). | unverified |
+| MT-004 | 050 | On a real server with FastAsyncWorldEdit (or WorldEdit), make a selection in world A, then move the player to world B and confirm `Player.worldEditSelection()` returns `null`; move back to world A and confirm the same selection is returned unchanged. | unverified |
 
 ## How to run
 
 MT-001 requires a Paper server with a WorldEdit implementation loaded; MT-002
 only needs a Paper server; MT-003 needs a throwaway consumer plugin (or an
-equivalent test build) in addition. There is no run server in this library repo;
-verify from a consumer plugin's dev server.
+equivalent test build) in addition. MT-004 requires a live WorldEdit/FAWE plugin
+and session: under MockBukkit `BukkitAdapter` is absent from the test classpath
+and its enum initializer needs `WorldEditPlugin.getInstance()`, so the
+world-scoping branch cannot be exercised. There is no run server in this library
+repo; verify from a consumer plugin's dev server.
