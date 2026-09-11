@@ -82,3 +82,56 @@ plugin-populated `INSTANCE.adapter` and cannot run under MockBukkit.
   on failure. The duplication of `WorldTestSupport` is necessary because that
   class lives in `core`'s test source set, which is not shared with `worldedit`.
 - **No earlier report in this round to concur with or dissent from.**
+
+## Round 2
+### Verdict
+Round-1 finding 1 is resolved: the new `EllipsoidRegion` case genuinely pins the
+generic `minimumPoint`/`maximumPoint` contract that the reversed `CuboidRegion`
+case could not, and it runs green under the existing harness. The correctness
+gate added to `worldEditSelection` is only reachable behind the live plugin, and
+`MT-001` now names the incomplete-selection scenarios, so there is no new
+automatable test to add. No new test-quality or harness-fidelity findings.
+
+### Findings
+#### No new findings.
+
+### Non-findings
+- **Round-1 finding 1 resolved.** `world edit region conversion uses the generic
+  min and max points` (`AdapterTest.kt:56-68`) converts an `EllipsoidRegion`
+  whose only corners are the interface `minimumPoint`/`maximumPoint` and asserts
+  the bounding box `(3,3,3)-(7,7,7)`. Because the receiver is the generic
+  `WERegion`, a regression that narrowed `toRegion` to `CuboidRegion` (or cast to
+  reach `getPos1`/`getPos2`) would now fail to compile or throw, which the
+  reversed `CuboidRegion` case alone could not detect. The new test passed in the
+  committed run (`worldedit/build/test-results/test/…AdapterTest.xml`, 4 tests,
+  0 failures).
+- **The old reversed-`CuboidRegion` case is now redundant but harmless.** It
+  still documents that a `CuboidRegion` input works and that both corners are
+  read; it is three cheap assertions and not worth deleting. It is not
+  tautological in the sense of never being able to fail — an adapter that used
+  one corner twice would fail it.
+- **The `isSelectionDefined` gate is correctly left to the manual gate.** The
+  branch (`Adapter.kt:37-38`) sits behind `BukkitAdapter.adapt(player)` and
+  `WorldEdit.getInstance().sessionManager`, both of which need a live
+  plugin/session, so no unit test can reach it. `MT-001`
+  (`docs/manual-test.md:11`) now explicitly covers "no selection" and an
+  "incomplete selection (only `//pos1`, or after switching worlds)" returning
+  `null`, which is exactly the new branch's observable behaviour.
+- **The new imports stay generic.** `EllipsoidRegion` and `Vector3` are
+  `com.sk89q.worldedit.*`, so the no-`com.fastasyncworldedit.*`-imports criterion
+  still holds.
+- **No test is missing or excessive for this round's source change.** The only
+  production change since round 1 is the `isSelectionDefined` gate, whose path is
+  unautomatable; adding a test around it would require stubbing WorldEdit's
+  session manager, which the harness cannot do. The suite remains four tests for
+  a 40-line adapter.
+- **Harness lifecycle and fidelity unchanged.** `@BeforeEach`/`@AfterEach`
+  still guarantee `MockBukkit.unmock()`, and `Region.toWorldEditRegion()` /
+  `Player.worldEditSelection()` remain the only paths the MockBukkit harness
+  cannot exercise — both already owned by `MT-001`.
+- **No new manual-test entry is required.** `MT-001` was extended in the same
+  commit as the production change it gates, which is the correct handling; no
+  further harness limit surfaced in this round.
+- **No round-2 findings from other reviewers to concur with or dissent from
+  within tester scope.** The architecture doc/status updates and the correctness
+  gate do not raise test-quality work.

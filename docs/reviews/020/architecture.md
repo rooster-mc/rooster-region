@@ -93,3 +93,46 @@ imports only `com.sk89q.worldedit.*`. Two documentation items remain:
   states the null contract that correctness finding 1 shows the code does not yet
   fully meet; the fix belongs with that finding, and no separate doc edit is
   needed once it lands.
+
+## Round 2
+### Verdict
+Both round-1 architecture findings are resolved: `AGENTS.md`'s status now matches
+the tree (000/010 done, 020 implemented and in review, 030 next) and
+`docs/architecture.md`'s `worldedit` paragraph now documents the
+`api(project(":core"))`, `compileOnly(paper-api)`, WorldEdit API `compileOnly`
+via FAWE, and `compileOnly(kotlin("stdlib"))`/POM seam. The round-1 code and test
+changes stay within the module boundary and packages, and I found no new
+module/package or documentation issues.
+
+### Findings
+#### No new findings.
+
+### Non-findings
+- **Round-1 finding 1 resolved.** `AGENTS.md:87-92` now reads "Tickets 000 ...
+  and 010 ... are done", "020 ... is implemented and in review", and points at
+  030 — accurate against `docs/tasks/README.md:10-13` and the working tree.
+- **Round-1 finding 2 resolved.** `docs/architecture.md:40-45` now lists
+  `api(project(":core"))`, `compileOnly(paper-api)`, the WorldEdit API
+  `compileOnly` via FAWE, and `compileOnly(kotlin("stdlib"))`, plus the
+  `kotlin.stdlib.default.dependency=false` POM consequence — matching
+  `worldedit/build.gradle.kts:23-32` and `gradle.properties:3`, and mirroring the
+  core paragraph (`docs/architecture.md:26-30`).
+- **Boundary unchanged by the round-1 fixes.** `Adapter.kt` still imports only
+  `com.sk89q.worldedit.*` (lines 3-6, 11); the `isSelectionDefined` gate (line 38)
+  is an internal control-flow change with no new dependency. The `worldedit`
+  module still publishes core only, with Paper/FAWE/stdlib `compileOnly`.
+- **Package and seam unchanged.** Main and test remain in
+  `dev.rooster.region.worldedit`, and `Adapter.kt` remains the single prescribed
+  seam (`docs/architecture.md:35-37`).
+- **The new test stays inside the generic API.** `AdapterTest.kt:4-6` imports
+  `com.sk89q.worldedit.math.Vector3` and `...regions.EllipsoidRegion`, both
+  `com.sk89q.worldedit.*`; no `com.fastasyncworldedit.*`.
+- **Docs remain in step after the correctness fix.** `docs/architecture.md:51-52`'s
+  "returns `null` when no selection exists" now matches `Adapter.kt:37-39`, and
+  `docs/manual-test.md:11` names the incomplete-selection case, matching the gate.
+- **`docs/tasks/README.md:12` and `docs/tasks/020-worldedit-adapter.md:3` still
+  read `todo`** — correct in-flight queue state owned by the orchestrator until
+  the ticket is marked done (`docs/workflow.md:51`), not doc staleness.
+- **Prior round-2 reports — concur.** I concur with the tester's and
+  correctness's round-2 verdicts (their round-1 findings resolved, no new
+  findings); nothing in them raises a module-boundary or documentation matter.

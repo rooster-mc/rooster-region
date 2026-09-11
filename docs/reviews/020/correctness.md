@@ -101,3 +101,52 @@ catches the never-touched-session case. One finding.
   underlying conversion behaviour it probes is functionally correct per the
   min/max normalisation above; the observation that the test cannot distinguish
   raw corners from min/max is a test-quality matter for the tester.
+
+## Round 2
+### Verdict
+Round-1 finding 1 is correctly fixed: the `isSelectionDefined` gate closes the
+`IncompleteRegionException` path before `getSelection` is called, so the
+null-on-no-selection contract now holds for the untouched, one-point, and
+world-changed cases. No new findings.
+
+### Findings
+#### No new findings.
+
+### Non-findings
+- **The `isSelectionDefined` gate is sufficient to prevent the throw.**
+  `Adapter.kt:37-39` reads `selectionWorld`, returns `null` if it is null, then
+  returns `null` unless `localSession.isSelectionDefined(selectionWorld)`, and
+  only then calls `getSelection(selectionWorld)`. Verified against the pinned
+  FAWE-Core 2.12.3: `isSelectionDefined(World)` returns
+  `selector.getIncompleteRegion().getWorld() != null && …equals(world) &&
+  selector.isDefined()`, and `CuboidRegionSelector.isDefined()` is exactly
+  `position1 != null && position2 != null` — the same condition
+  `CuboidRegionSelector.getRegion()` throws on. So whenever the gate passes,
+  `getSelection` cannot throw `IncompleteRegionException`. `isSelectionDefined`
+  itself only reads the selector and `checkNotNull(world)` (already non-null), so
+  it cannot throw on this path.
+- **The `WorldWrapper` unwrap is still consistent.** `selectionWorld` comes from
+  `getSelectionWorld()`, which returns `WorldWrapper.getParent()` when the
+  incomplete region's world is a wrapper. `isSelectionDefined(parent)` then
+  compares `wrapper.equals(parent)`, and `WorldWrapper.equals(other)` delegates
+  to `parent.equals(other)`, which is true; the same holds for the subsequent
+  `getSelection(parent)` world check.
+- **A defined selection still round-trips.** With both positions set,
+  `isSelectionDefined` is true and `getSelection(selectionWorld)` returns the
+  region as before, so the fix does not change the successful path.
+- **The new `EllipsoidRegion` case is mathematically correct.** `AdapterTest.kt:56-68`
+  builds a radius-2 ellipsoid centred at `(5,5,5)` and asserts the bounding box
+  `(3,3,3)-(7,7,7)`. `EllipsoidRegion` exposes only the interface
+  `getMinimumPoint`/`getMaximumPoint` (confirmed via `javap`), so the test pins
+  the generic conversion, and `getMinimumPoint`/`getMaximumPoint` are
+  `center ∓ radius` for these exact values. This is tester-scope; I note only
+  that it introduces no correctness issue.
+- **The adapter still converts a non-cuboid region to its bounding box.** That
+  remains intentionally lossy for a cuboid `core.Region` and within the design's
+  cuboid-only scope (`docs/design.md:54`); no change since round 1.
+- **MT-001 now names the incomplete-selection cases.** The manual gate's new
+  wording matches the behaviour the gate implements, so the acceptance criterion
+  is covered by a real-server check rather than left unguarded.
+- **No new correctness findings from the tester's round-2 report.** Its findings
+  are test-quality and harness-fidelity observations; nothing in them conflicts
+  with the adapter's logic, math, or API contract.
