@@ -7,7 +7,7 @@ review pipeline in `docs/workflow.md`.
 
 | Id | Title | Parent | Depends on | Status |
 |---|---|---|---|---|
-| [000](000-project-setup.md) | Gradle setup for core and worldedit modules | MVP | — | todo |
+| [000](000-project-setup.md) | Gradle setup for core and worldedit modules | MVP | — | done |
 | [010](010-core-region.md) | Core region, face, and geometry helpers | MVP | 000 | todo |
 | [020](020-worldedit-adapter.md) | WorldEdit adapter module | MVP | 010 | todo |
 | [030](030-docs-and-publish.md) | README, publishing, and consumption | MVP | 000, 010, 020 | todo |
