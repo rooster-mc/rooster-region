@@ -91,3 +91,73 @@ criterion; the ticket Notes also omit the added foojay toolchain-resolver plugin
   do not re-report them. The tester's observation that `worldedit` has no test/main
   source means its FAWE/BOM compile classpath is not exercised by `just build`; that is
   a test-coverage point, not a module-boundary one, so it stays with the tester.
+
+## Round 2
+### Verdict
+All three Round 1 findings are resolved: `AGENTS.md`'s status is rewritten,
+`docs/design.md` and `docs/architecture.md` now record the stdlib seam, and the ticket
+Notes document the foojay resolver and JVM args. Module boundaries and naming are
+unchanged and correct, and the new `check`-bound verification tasks stay inside their
+own modules; two documentation items still need attention.
+
+### Findings
+#### 1. `AGENTS.md`'s "justfile targets do not exist yet" parenthetical is now stale
+- Location: `AGENTS.md:34`
+- Problem: it still reads "(If `justfile` targets do not exist yet, they are created by
+  ticket 000.)". The `justfile` exists at the repo root with `build`, `test`, `format`
+  and `publish`, so the caveat is false and contradicts the `just` commands listed
+  directly above it. The Round 1 status rewrite updated the `Current status` section
+  but missed this line in the same file.
+- Suggested fix: delete the parenthetical in the 000 commit (the targets exist), or
+  replace it with a note that the `justfile` was created by ticket 000.
+
+#### 2. Ticket Notes will go stale when tester Round 2 finding 1 is resolved
+- Location: `docs/tasks/000-project-setup.md:73-80` (specifically lines 77-78)
+- Problem: the "Smoke coverage" Note names `worldedit`'s
+  `WorldEditCompileClasspathTest` and describes it as "WorldEdit absent at runtime".
+  Tester Round 2 finding 1 asks for that test to be deleted or retargeted because it
+  asserts the wrong seam and will obstruct ticket 020. Whichever resolution is chosen,
+  the Note as written will no longer match the tree, so the same commit that touches
+  the test must update this list. This is the one docs-in-step dependency introduced by
+  the Round 2 findings.
+- Suggested fix: when fixing tester Round 2 finding 1, drop or rewrite the
+  `WorldEditCompileClasspathTest` clause in `docs/tasks/000-project-setup.md:77-78` so
+  the Note names only the tests/tasks that remain.
+
+### Non-findings
+- **Round 1 A1 resolved.** `AGENTS.md:87-92` now states ticket 000 is implemented and
+  in review, and points at ticket 010 — accurate against the tree.
+- **Round 1 A2 resolved.** `docs/design.md:18-20` and `docs/architecture.md:26-30` both
+  now state stdlib is `compileOnly`, cite `kotlin.stdlib.default.dependency=false`, and
+  say consumers supply stdlib at runtime — accurate against
+  `core/build.gradle.kts:21` and `gradle.properties:3`.
+- **Round 1 A3 resolved.** `docs/tasks/000-project-setup.md:65-68` records the foojay
+  resolver (`settings.gradle.kts:2`) and `org.gradle.jvmargs=-Xmx2g`
+  (`gradle.properties:4`), with the reason for each.
+- **Module boundaries hold.** `core/build.gradle.kts:18-28` still declares only Paper
+  API, joml, stdlib and test deps — no Rooster, Exposed, WorldEdit or Adventure.
+  WorldEdit/FAWE remains confined to `worldedit/build.gradle.kts:22-39`, and the new
+  `verifyCoreDependencies`/`verifyWorldEditClasspath` tasks live in their respective
+  module files and scan only that module's own configurations. The `worldedit` test
+  (`WorldEditCompileClasspathTest.kt:10`) references the WorldEdit API only as a
+  `Class.forName` string, so it adds no compile dependency.
+- **Naming and artifact coordinates unchanged and correct.**
+  `core/build.gradle.kts:7,98` and `worldedit/build.gradle.kts:10,103` feed the same
+  `artifactName` into `archivesName` and the publication `artifactId`, matching
+  `docs/design.md:39-42` and `docs/architecture.md:6-10`.
+- **Extendability unchanged.** The two `moduleNames` helpers
+  (`core/build.gradle.kts:62-67`, `worldedit/build.gradle.kts:57-62`) and the
+  per-module verification blocks are duplicated, but with exactly two modules and no
+  ticket requirement for a convention plugin or version catalog this remains acceptable;
+  the duplication is the natural refactor point if a third module lands.
+- **`AGENTS.md` Stack line still accurate** (`AGENTS.md:21`: Kotlin `2.4.20` matches
+  `build.gradle.kts:2`; Paper `1.21.4`, joml, WorldEdit `compileOnly`, JUnit +
+  MockBukkit all match).
+- **Ticket `status: todo`** (`docs/tasks/000-project-setup.md:3`,
+  `docs/tasks/README.md:10`) is still orchestrator-owned queue state; I note the
+  inconsistency with `AGENTS.md:89` ("in review") but leave it to the
+  ticket-orchestrator to set at commit/done, as in Round 1.
+- **Prior reports.** I concur with correctness's Round 2 verdict (no findings) and with
+  its agreement on the tester's three findings. The tester's findings are test-quality
+  and I do not re-report them; my finding 2 only tracks the documentation consequence
+  of resolving tester finding 1.

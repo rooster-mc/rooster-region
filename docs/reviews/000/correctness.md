@@ -85,3 +85,78 @@ proxy.
   `compileClasspath` (the FAWE/BOM resolution) is never exercised by
   `just build`/`just test`; the dependency graph is only proven by the reasoning
   above, not by the green tree.
+
+## Round 2
+### Verdict
+Commit `b232485` adds verification without changing the published contract: the
+new Gradle tasks assert the correct seams, the `artifactName` hoist keeps both
+artifactIds and archive names consistent, and the published POM/module metadata
+is still `joml`-only (core) and core-only (worldedit). I found no new
+correctness, API or integration defect and I concur with the tester's three
+Round 2 findings, all of which are test-quality.
+
+### Findings
+None.
+
+### Non-findings
+- **`verifyCoreDependencies` asserts the right things**
+  (`core/build.gradle.kts:38-92`). It depends on
+  `generatePomFileForMavenPublication`, so the POM it reads is freshly generated
+  rather than stale; the regex
+  (`<dependency>\s*<groupId>…</groupId>\s*<artifactId>…</artifactId>`) matches the
+  actual `pom-default.xml` and yields exactly `["org.joml:joml"]`; the
+  `runtimeClasspath == [joml]` assertion covers the runtime/POM seam; and the
+  `compileClasspath` scan covers `compileOnly` leaks that the POM/runtime checks
+  cannot see. An empty or unparseable POM makes the list mismatch and fails, so
+  there is no silent pass. The task is `check`-bound
+  (`core/build.gradle.kts:90-92`) and evidence shows it ran: the POM mtime moved
+  to 23:38 alongside the `check` tasks.
+- **`verifyWorldEditClasspath` asserts the compile-only contract**
+  (`worldedit/build.gradle.kts:49-97`). It resolves the real (non-test)
+  `compileClasspath`, confirms `dev.rooster.region:core` and
+  `com.fastasyncworldedit:FastAsyncWorldEdit-Core` are present, opens the
+  resolved FAWE-Core jar and confirms `com/sk89q/worldedit/regions/CuboidRegion.class`
+  exists, then asserts the non-test `runtimeClasspath` has no FAWE/WE modules.
+  Because the green tree means this task passed, it also proves the
+  `compileOnly(platform("…bom-newest:1.52"))` constraint propagates to
+  `compileClasspath` and resolves the unversioned FAWE declarations — closing the
+  one thing Round 1 could only reason about. It is `check`-bound
+  (`worldedit/build.gradle.kts:95-97`).
+- **`artifactName` hoist is correct** (`core/build.gradle.kts:7,10,98`;
+  `worldedit/build.gradle.kts:10,13,103`). The same value feeds `base.archivesName`
+  and the publication `artifactId`, so the jar name and Maven coordinate stay in
+  sync; the published POMs confirm `rooster-region` and
+  `rooster-region-worldedit`, and the worldedit POM still references
+  `dev.rooster.region:rooster-region:1.0-SNAPSHOT`.
+- **Published contract unchanged.** The re-published
+  `rooster-region-1.0-SNAPSHOT.pom` still lists only `org.joml:joml:1.10.9`
+  (runtime), and `rooster-region-worldedit-1.0-SNAPSHOT.pom` still lists only the
+  core project (compile); both `module.json` variants are likewise clean. The new
+  tasks do not alter the publications.
+- **New tests run and pass.** `TEST-dev.rooster.region.MockBukkitHarnessTest.xml`
+  and `TEST-dev.rooster.region.worldedit.WorldEditCompileClasspathTest.xml` both
+  report `failures="0" errors="0"`, and the former's 0.451s runtime plus SLF4J
+  output confirms the pinned `mockbukkit-v1.21:4.45.0` actually boots.
+- **Doc/Notes edits match the build.** `docs/design.md` and
+  `docs/architecture.md` now state that Kotlin stdlib is `compileOnly` and the
+  published POM is `joml`-only (consumers supply stdlib at runtime) — accurate
+  against `gradle.properties:3` and the build files. The ticket Notes accurately
+  describe the BOM-as-`compileOnly`, `isTransitive = false`, the two `check`-bound
+  tasks, and the deliberate deferral of symbol-level `api(project(":core"))`
+  exercise to 020.
+- **Concur with the tester's Round 2 findings 1–3.** Finding 1
+  (`WorldEditCompileClasspathTest` asserts test-runtime absence, not the published
+  contract, and will obstruct 020 once WE is added as `testImplementation`),
+  finding 2 (`MockBukkitHarnessTest` unmocks only on the success path), and
+  finding 3 (the `dev.rooster.core` prefix is narrower than the Rooster-family
+  intent) are valid and within the tester's scope; I add no duplicate correctness
+  finding. On finding 3 I agree `dev.rooster` is the safe broadening because the
+  helper already drops the project's own `dev.rooster.region:core` component.
+- **Round 1 non-findings still hold.** No Round 1 correctness finding was
+  outstanding, and the joml-scope note is unchanged by this commit.
+- **Minor coverage nuance (not a defect):** `verifyWorldEditClasspath` checks
+  `CuboidRegion` in the FAWE-Core jar but not `BukkitAdapter` in the FAWE-Bukkit
+  jar; since 020's adapter imports `com.sk89q.worldedit.bukkit.BukkitAdapter`, a
+  missing/renamed Bukkit-jar class would still surface only at 020 compile time.
+  The artifact is declared and the reference build uses it, so this is a coverage
+  gap, not a wrong assertion.

@@ -31,8 +31,6 @@ just format     # ktlint
 just publish    # publishToMavenLocal
 ```
 
-(If `justfile` targets do not exist yet, they are created by ticket 000.)
-
 ## Orchestration model
 
 Two orchestrator tiers, then workers:

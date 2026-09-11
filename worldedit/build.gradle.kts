@@ -54,14 +54,25 @@ tasks.register("verifyWorldEditClasspath") {
     val runtimeClasspath = configurations.named("runtimeClasspath")
 
     doLast {
-        fun moduleNames(configuration: org.gradle.api.artifacts.Configuration): List<String> =
+        // allComponents includes this project's own component, which is not a
+        // dependency and must not be compared against the expected lists.
+        fun externalModuleNames(
+            configuration: org.gradle.api.artifacts.Configuration
+        ): List<String> =
             configuration.incoming.resolutionResult.allComponents
                 .mapNotNull { it.moduleVersion }
                 .map { "${it.group}:${it.name}" }
                 .filterNot { it == "dev.rooster.region:worldedit" }
                 .sorted()
 
-        val compileModules = moduleNames(compileClasspath.get())
+        fun jarShips(jarNamePrefix: String, entry: String): Boolean {
+            val jar =
+                compileClasspath.get().files.firstOrNull { it.name.startsWith(jarNamePrefix) }
+                    ?: error("worldedit compileClasspath must resolve the $jarNamePrefix jar")
+            return ZipFile(jar).use { it.getEntry(entry) != null }
+        }
+
+        val compileModules = externalModuleNames(compileClasspath.get())
         check(compileModules.contains("dev.rooster.region:core")) {
             "worldedit compileClasspath must include the core project: $compileModules"
         }
@@ -69,19 +80,16 @@ tasks.register("verifyWorldEditClasspath") {
             "worldedit compileClasspath must include the WorldEdit API: $compileModules"
         }
 
-        val coreJarName = "FastAsyncWorldEdit-Core"
-        val faweCore =
-            compileClasspath.get().files.firstOrNull { it.name.startsWith(coreJarName) }
-                ?: error("worldedit compileClasspath must resolve the FAWE-Core jar")
-        val apiClass =
-            ZipFile(faweCore).use { zip ->
-                zip.getEntry("com/sk89q/worldedit/regions/CuboidRegion.class")
-            }
-        check(apiClass != null) {
-            "FAWE-Core jar must ship the com.sk89q.worldedit API: ${faweCore.name}"
+        val coreEntry = "com/sk89q/worldedit/regions/CuboidRegion.class"
+        check(jarShips("FastAsyncWorldEdit-Core", coreEntry)) {
+            "FAWE-Core jar must ship the WorldEdit core API"
+        }
+        val bukkitEntry = "com/sk89q/worldedit/bukkit/BukkitAdapter.class"
+        check(jarShips("FastAsyncWorldEdit-Bukkit", bukkitEntry)) {
+            "FAWE-Bukkit jar must ship the WorldEdit Bukkit adapter API"
         }
 
-        val runtimeModules = moduleNames(runtimeClasspath.get())
+        val runtimeModules = externalModuleNames(runtimeClasspath.get())
         val leaked =
             runtimeModules.filter {
                 it.startsWith("com.fastasyncworldedit") || it.startsWith("com.sk89q.worldedit")

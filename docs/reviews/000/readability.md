@@ -96,3 +96,82 @@ structural rewrites.
   test-quality matters outside my scope. The tester's and correctness's shared
   observation that `worldedit` has no sources is not a readability defect — the
   module is scaffolding for ticket 020.
+
+## Round 2
+### Verdict
+All four Round 1 findings are resolved cleanly — the stdlib rationale is now
+inline, both artifact names are single-sourced, the BOM/`isTransitive` choices
+are commented, and `.editorconfig` is rooted. The new `check`-bound verification
+tasks are followable and ktlint-clean; I found two small clarity gaps in how they
+describe and name their own checks.
+
+### Findings
+#### 1. `verifyCoreDependencies`' description omits one of its three checks
+- Location: `core/build.gradle.kts:40`
+- Problem: the description says the task "Asserts the published core POM and
+  runtime classpath expose only joml", but the task also scans
+  `compileClasspath` for forbidden WorldEdit/Exposed/Rooster leaks
+  (`core/build.gradle.kts:74-86`). That third check is the only guard for
+  `compileOnly` leaks, which the POM and runtime assertions cannot see, so it is
+  the most important part to advertise. A reader skimming the task (or
+  `./gradlew tasks`) would not know it exists, and a future maintainer could drop
+  it believing the description is complete.
+- Suggested fix: broaden the description, e.g. "Asserts the published core POM
+  and runtime classpath are joml-only and the compile classpath has no
+  framework/ORM/WorldEdit leaks."
+
+#### 2. The `moduleNames` helper silently drops the project's own component, and its name does not say so
+- Location: `core/build.gradle.kts:62-67` (filter at `:66`);
+  `worldedit/build.gradle.kts:57-62` (filter at `:61`)
+- Problem: `moduleNames` returns module coordinates from
+  `incoming.resolutionResult.allComponents`, which includes this project's own
+  component, so the helper filters out `dev.rooster.region:core` /
+  `dev.rooster.region:worldedit`. The name `moduleNames` suggests a plain
+  enumeration, so a reader cannot tell that the result is "all resolved modules
+  except me" or why the exclusion is there; a caller comparing the result to an
+  expected list has to know the implicit filter.
+- Suggested fix: rename to something that states the intent (e.g.
+  `externalModuleNames`) or add a one-line comment above the `filterNot`
+  explaining that `allComponents` includes this project itself.
+
+### Non-findings
+- **R1 resolved.** `gradle.properties:1-2` now carries a two-line `#` comment
+  tying `kotlin.stdlib.default.dependency=false` to the published-POM/stdlib
+  story; the flag is no longer unexplained.
+- **R2 resolved.** `val artifactName` is hoisted in both scripts
+  (`core/build.gradle.kts:7`, `worldedit/build.gradle.kts:10`) and feeds both
+  `archivesName` (`:10`, `:13`) and `artifactId` (`:98`, `:103`), so the jar name
+  and Maven coordinate are single-sourced.
+- **R3 resolved.** `worldedit/build.gradle.kts:25-26` explains the `compileOnly`
+  BOM and `:29-30` the non-transitive Bukkit adapter, and the same rationale is
+  recorded in `docs/tasks/000-project-setup.md:69-72`.
+- **R4 resolved.** `.editorconfig:1` now sets `root = true`, so the formatter
+  contract is self-contained.
+- **New verification tasks are structurally consistent and followable.** Both
+  register with `group = "verification"` and a description, capture
+  configurations at configuration time, do the work in `doLast`, and are wired
+  into `check` via `tasks.named("check")` (`core/build.gradle.kts:38-92`,
+  `worldedit/build.gradle.kts:49-97`). `verifyWorldEditClasspath`'s description
+  ("WorldEdit API is on the compile classpath only") adequately covers its
+  compile-presence plus runtime-absence checks, so finding 1 is scoped to the
+  core task.
+- **ktlint/formatting is clean.** No line in either build script exceeds the
+  `.editorconfig` `max_line_length = 100`, and the nested helpers, regex call
+  and `ZipFile` block follow the wrapping style already used elsewhere; the
+  `java.util.zip.ZipFile` import in `worldedit/build.gradle.kts:1` is the only
+  import needed and is placed correctly.
+- **justfile unchanged and still readable.** Same four recipes with purpose
+  comments; the new verification tasks ride on `just build` via `check`, which is
+  consistent with the ticket's command list.
+- **No leftover or dead files.** The tree adds only the two verification tasks
+  and two tests; wrapper, `.gitignore` and module layout are unchanged.
+- **Prior reports.** I concur with the tester's Round 2 findings 1–3 — they are
+  test-quality matters outside my scope. On tester finding 1 I add only the
+  readability facet: `WorldEditCompileClasspathTest`'s name promises a
+  compile-classpath assertion while its body asserts test-runtime absence, so
+  whichever resolution is chosen the name should follow the assertion. I concur
+  with architecture's Round 2 findings (stale `AGENTS.md` parenthetical and the
+  ticket Note that will need updating with tester finding 1); both are docs
+  matters. I concur with correctness's Round 2 verdict (no findings), including
+  that the `artifactName` hoist and the new tasks leave the published contract
+  unchanged.

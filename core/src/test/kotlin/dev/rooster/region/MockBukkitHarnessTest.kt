@@ -8,7 +8,10 @@ class MockBukkitHarnessTest {
     @Test
     fun `MockBukkit boots and shuts down`() {
         val server = MockBukkit.mock()
-        assertNotNull(server)
-        MockBukkit.unmock()
+        try {
+            assertNotNull(server)
+        } finally {
+            MockBukkit.unmock()
+        }
     }
 }

@@ -73,10 +73,11 @@ publishes, so the region code can be ported into it.
 - Smoke coverage: `core` has `ClasspathSmokeTest` (forbidden FQCNs absent) and
   `MockBukkitHarnessTest` (pinned MockBukkit boots), and the `check`-bound
   `verifyCoreDependencies` task asserts the generated POM and `runtimeClasspath`
-  are `joml`-only and that `compileClasspath` has no WorldEdit/Exposed/Rooster
-  leak. `worldedit` has `WorldEditCompileClasspathTest` (WorldEdit absent at
-  runtime) plus the `check`-bound `verifyWorldEditClasspath` task, which resolves
-  the FAWE/BOM compile classpath and asserts the FAWE-Core jar ships
-  `com.sk89q.worldedit.regions.CuboidRegion`.
+  are `joml`-only and that `compileClasspath` has no `dev.rooster`/Exposed/
+  WorldEdit leak. `worldedit` is verified by the `check`-bound
+  `verifyWorldEditClasspath` task, which resolves the FAWE/BOM compile classpath
+  (asserting `dev.rooster.region:core` and FAWE-Core) and asserts the FAWE-Core
+  and FAWE-Bukkit jars ship `CuboidRegion` and `BukkitAdapter`; it has no JUnit
+  test until ticket 020 adds the adapter under test.
 - Symbol-level exercise of `worldedit`'s `api(project(":core"))` is deferred to
   ticket 020: `core` has no public symbol to reference until ticket 010 lands.

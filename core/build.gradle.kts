@@ -37,7 +37,8 @@ tasks.test {
 
 tasks.register("verifyCoreDependencies") {
     group = "verification"
-    description = "Asserts the published core POM and runtime classpath expose only joml."
+    description =
+        "Asserts the published core POM and runtime classpath are joml-only and the compile classpath has no framework/ORM/WorldEdit leaks."
     dependsOn(tasks.named("generatePomFileForMavenPublication"))
 
     val pomFile = layout.buildDirectory.file("publications/maven/pom-default.xml")
@@ -59,14 +60,18 @@ tasks.register("verifyCoreDependencies") {
             "rooster-region POM must declare only joml but declares $dependencies"
         }
 
-        fun moduleNames(configuration: org.gradle.api.artifacts.Configuration): List<String> =
+        // allComponents includes this project's own component, which is not a
+        // dependency and must not be compared against the expected lists.
+        fun externalModuleNames(
+            configuration: org.gradle.api.artifacts.Configuration
+        ): List<String> =
             configuration.incoming.resolutionResult.allComponents
                 .mapNotNull { it.moduleVersion }
                 .map { "${it.group}:${it.name}" }
                 .filterNot { it == "dev.rooster.region:core" }
                 .sorted()
 
-        val runtimeModules = moduleNames(runtimeClasspath.get())
+        val runtimeModules = externalModuleNames(runtimeClasspath.get())
         check(runtimeModules == listOf("org.joml:joml")) {
             "core runtimeClasspath must be joml-only but contains $runtimeModules"
         }
@@ -76,10 +81,10 @@ tasks.register("verifyCoreDependencies") {
                 "com.sk89q.worldedit",
                 "com.fastasyncworldedit",
                 "org.jetbrains.exposed",
-                "dev.rooster.core",
+                "dev.rooster",
             )
         val compileLeaks =
-            moduleNames(compileClasspath.get())
+            externalModuleNames(compileClasspath.get())
                 .filter { name -> forbidden.any { name.startsWith(it) } }
         check(compileLeaks.isEmpty()) {
             "core compileClasspath leaks forbidden modules: $compileLeaks"
