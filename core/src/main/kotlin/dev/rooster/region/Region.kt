@@ -14,6 +14,7 @@ import org.bukkit.entity.Player
 import org.joml.Vector3d
 import kotlin.math.absoluteValue
 
+// TODO: This file does a lot. How can we split it up?
 @Suppress("unused")
 class Region(
     val edge1: Location,
@@ -222,27 +223,32 @@ class Region(
             val changingEdge = if (face.positive) maxEdge else minEdge
             val modifiedEdge =
                 when (face.axis) {
-                    Axis.X ->
+                    Axis.X -> {
                         Location(
                             world,
                             changingEdge.x + faceShift,
                             changingEdge.y,
                             changingEdge.z
                         )
-                    Axis.Y ->
+                    }
+
+                    Axis.Y -> {
                         Location(
                             world,
                             changingEdge.x,
                             changingEdge.y + faceShift,
                             changingEdge.z
                         )
-                    Axis.Z ->
+                    }
+
+                    Axis.Z -> {
                         Location(
                             world,
                             changingEdge.x,
                             changingEdge.y,
                             changingEdge.z + faceShift
                         )
+                    }
                 }
             if (face.positive) maxEdge = modifiedEdge else minEdge = modifiedEdge
         }

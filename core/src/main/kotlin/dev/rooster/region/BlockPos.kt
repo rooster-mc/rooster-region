@@ -1,5 +1,7 @@
 package dev.rooster.region
 
+// TODO: Strange that there are no helper methods to deal between BlockPos, Bukkit Location and
+// rooster Region
 data class BlockPos(
     val x: Int,
     val y: Int,
