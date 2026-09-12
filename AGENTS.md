@@ -93,4 +93,6 @@ README, publishing and consumption work), 040
 ([`docs/tasks/040-blockpos-and-blockat.md`](docs/tasks/040-blockpos-and-blockat.md),
 `BlockPos` and `Region.blockAt`) and 050
 ([`docs/tasks/050-world-scoped-selection.md`](docs/tasks/050-world-scoped-selection.md),
-world-scoped `worldEditSelection`) are done. No MVP tickets remain.
+world-scoped `worldEditSelection`) are done. Ticket 060
+([`docs/tasks/060-lazy-block-iteration.md`](docs/tasks/060-lazy-block-iteration.md),
+lazy `blockPositions`/`loadedBlockPositions`) is done. No MVP tickets remain.

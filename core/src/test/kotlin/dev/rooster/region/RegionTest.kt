@@ -338,6 +338,40 @@ class RegionTest : WorldTestSupport() {
     }
 
     @Test
+    fun `blockPositions covers every coordinate exactly once`() {
+        val region = Region(location(-1.0, 0.0, 2.0), location(1.0, 2.0, 3.0))
+
+        val positions = region.blockPositions.toList()
+
+        assertEquals(region.volume, positions.size)
+        assertEquals(region.volume, positions.toSet().size)
+        assertEquals(BlockPos(-1, 0, 2), positions.first())
+        assertEquals(BlockPos(1, 2, 3), positions.last())
+    }
+
+    @Test
+    fun `loadedBlockPositions skips chunks that are not loaded`() {
+        val far = Region(location(100_000.0, 0.0, 100_000.0), location(100_015.0, 5.0, 100_015.0))
+
+        assertFalse(far.loadedBlockPositions.iterator().hasNext())
+    }
+
+    @Test
+    fun `loadedBlockPositions yields the region intersection of loaded chunks`() {
+        world.getChunkAt(0, 0)
+        world.getChunkAt(1, 0)
+
+        val fromX = 10
+        val toX = 20
+        val region =
+            Region(location(fromX.toDouble(), 0.0, 0.0), location(toX.toDouble(), 0.0, 0.0))
+
+        val positions = region.loadedBlockPositions.toList()
+
+        assertEquals((fromX..toX).map { BlockPos(it, 0, 0) }, positions)
+    }
+
+    @Test
     fun `blocksArray indexes blocks by their relative coordinate`() {
         val region = Region(location(0.0, 0.0, 0.0), location(1.0, 2.0, 3.0))
 

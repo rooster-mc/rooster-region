@@ -13,6 +13,7 @@ review pipeline in `docs/workflow.md`.
 | [030](030-docs-and-publish.md) | README, publishing, and consumption | MVP | 000, 010, 020 | done |
 | [040](040-blockpos-and-blockat.md) | BlockPos and Region.blockAt | MVP | 010 | done |
 | [050](050-world-scoped-selection.md) | World-scoped worldEditSelection | MVP | 020 | done |
+| [060](060-lazy-block-iteration.md) | Lazy block enumeration and loaded-chunk filtering | MVP | 040 | done |
 
 ## Template
 

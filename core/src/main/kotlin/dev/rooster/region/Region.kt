@@ -103,12 +103,43 @@ class Region(
 
     fun blockAt(position: BlockPos): Block = world.getBlockAt(position.x, position.y, position.z)
 
-    val blocks: List<Block>
-        get() {
-            return iterateRegion { x, y, z ->
-                world.getBlockAt(x, y, z)
+    val blockPositions: Sequence<BlockPos>
+        get() =
+            sequence {
+                for (x in minX..maxX) {
+                    for (y in minY..maxY) {
+                        for (z in minZ..maxZ) {
+                            yield(BlockPos(x, y, z))
+                        }
+                    }
+                }
             }
-        }
+
+    // Chunk-major so the loaded check is paid once per chunk rather than per block; the yielded
+    // coordinates are only the region's intersection with each loaded chunk.
+    val loadedBlockPositions: Sequence<BlockPos>
+        get() =
+            sequence {
+                for (chunkX in minXChunk..maxXChunk) {
+                    for (chunkZ in minZChunk..maxZChunk) {
+                        if (!world.isChunkLoaded(chunkX, chunkZ)) continue
+                        val fromX = maxOf(minX, chunkX shl 4)
+                        val toX = minOf(maxX, (chunkX shl 4) + 15)
+                        val fromZ = maxOf(minZ, chunkZ shl 4)
+                        val toZ = minOf(maxZ, (chunkZ shl 4) + 15)
+                        for (x in fromX..toX) {
+                            for (y in minY..maxY) {
+                                for (z in fromZ..toZ) {
+                                    yield(BlockPos(x, y, z))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+    val blocks: List<Block>
+        get() = blockPositions.map(::blockAt).toList()
 
     val blocksArray: Array<Array<Array<Block>>>
         get() {
