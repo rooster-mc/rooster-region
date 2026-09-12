@@ -25,9 +25,10 @@ behaviour.
   `docs/architecture.md` in step with the code.
 
 ## How
-- Read the ticket, the diff, the relevant docs, and the earlier reports the
-  ticket-orchestrator passes you.
-- Do not re-report a prior finding. Concur or dissent.
+- Read the ticket, the diff, and the relevant docs. Same-round peers run in
+  parallel, so you will not see their reports; stay within your own scope.
+- In round 2 you are given the round-1 reports: do not re-report a finding
+  already addressed there. Concur or dissent.
 - Do not run the build or the suite; the implementor hands over a green tree.
 - Reference concrete files and lines.
 

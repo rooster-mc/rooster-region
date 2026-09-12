@@ -29,16 +29,16 @@ ticket end to end. You never implement or review yourself; you delegate.
 1. Read the ticket in `docs/tasks/` and its `reviewers` list.
 2. Spawn `implementor` with the ticket. It implements, runs build/test/format,
    and leaves the tree green. Keep its `task_id`.
-3. For each reviewer in order, spawn it with the ticket id, the round number,
-   **and the paths of every earlier report in this round** (under
-   `docs/reviews/<id>/`). It writes `docs/reviews/<id>/<role>.md`.
+3. Spawn **every** reviewer in the ticket's list **concurrently** (one message,
+   multiple task calls), each with the ticket id and round number. They write
+   `docs/reviews/<id>/<role>.md`; same-round peers do not see each other.
 4. Hand **all** reports to `implementor` for fixes. Every finding must be fixed
    or explicitly deferred to a named ticket/gate with a reason. Keep its
    `task_id`.
 5. Commit the result (conventional commit, per `AGENTS.md`).
 6. Round 2: **resume** the same sessions with their `task_id` and repeat steps
-   3–5, so round 2 starts from the accumulated findings without reloading
-   context.
+   3–5 — again in parallel — seeding each reviewer with the round-1 reports, so
+   round 2 starts from the accumulated findings without reloading context.
 7. Record any acceptance criterion that cannot be automated in
    `docs/manual-test.md`, naming this ticket.
 8. Set the ticket `status: done`, update `docs/tasks/README.md`, and commit.
@@ -46,8 +46,8 @@ ticket end to end. You never implement or review yourself; you delegate.
 ## Boundaries
 - Only spawn `implementor` and the reviewers; you cannot spawn other agents.
 - Do not edit source, run the build, or run reviews yourself.
-- Keep the reviewer order from the ticket; omit only stages the ticket marks
-  irrelevant.
+- Run all listed reviewers concurrently; omit only stages the ticket marks
+  irrelevant (list order is not significant).
 - Reviewers report only within their own scope (see `docs/workflow.md`).
 - Findings carry no severity labels; every finding is work. Require a named
   deferral target and reason for anything not fixed.

@@ -30,9 +30,10 @@ Perfect readability without making the soup worse. Do not propose gratuitous
 rewrites; flag only what genuinely slows a reader down.
 
 ## How
-- Read the diff, the full files it touches, and the earlier reports the
-  ticket-orchestrator passes you.
-- Do not re-report a prior finding. Concur or dissent.
+- Read the diff and the full files it touches. Same-round peers run in
+  parallel, so you will not see their reports; stay within your own scope.
+- In round 2 you are given the round-1 reports: do not re-report a finding
+  already addressed there. Concur or dissent.
 - Judge formatting from the code; the implementor runs the formatter and hands
   over a clean tree. Do not run long tools yourself.
 - Reference concrete files and lines.

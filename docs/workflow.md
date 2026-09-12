@@ -40,24 +40,30 @@ Run by `ticket-orchestrator`:
 
 1. Read the ticket and its `reviewers` list.
 2. `implementor` implements it. Keep its `task_id`.
-3. For each reviewer in order, spawn it with the ticket id, the round number,
-   and the paths of every earlier report in this round. It writes its own report.
+3. Spawn every reviewer in the ticket's `reviewers` list **concurrently** with
+   the ticket id and round number. They run in parallel and write only their own
+   report; same-round peers do not see each other.
 4. Hand **all** reports to `implementor`. Every finding must be fixed, or
    explicitly deferred to a named ticket/gate with a reason.
 5. **Commit** the resulting state.
-6. Round 2: **resume** the same sessions via `task_id` and repeat steps 3–5.
+6. Round 2: **resume** the same sessions via `task_id` and repeat steps 3–5 —
+   again in parallel — seeding each reviewer with the round-1 reports, so
+   nothing fixed there is re-reported.
 7. Record any acceptance criterion that cannot be automated in
    `docs/manual-test.md` (see [Manual gate](#manual-gate)).
 8. Mark the ticket `done` and commit.
 
-Two rounds total per ticket. Omit stages that do not apply, but keep the order
-of those that remain.
+Two rounds total per ticket. Omit stages that do not apply.
 
 ## Reviewer handoff (statefulness)
 
-- The ticket-orchestrator passes the paths of every earlier report in the round
-  into each reviewer's prompt.
-- A reviewer must **not** re-report a prior finding. It may **concur** or
+Same-round reviewers run in **parallel**, so they cannot read each other's
+reports. Scopes are exclusive, so they should not collide.
+
+- Round 1 cannot seed prior reports; each reviewer works only from the ticket
+  and the diff.
+- Round 2 seeds each reviewer with the full set of **round-1 reports** and the
+  fixes. A reviewer must **not** re-report a prior finding. It may **concur** or
   **dissent**, and may add findings only within its own scope.
 - Findings carry **no severity labels**. A finding is work: fixed, or deferred
   with a named target and a reason.

@@ -26,9 +26,10 @@ contracts. You do not report test quality (tester) or documentation wording
 - Does the change satisfy the ticket's acceptance criteria?
 
 ## How
-- Read the ticket, the diff, the surrounding code, and the earlier reports the
-  ticket-orchestrator passes you.
-- Do not re-report a prior finding. Concur (say so, add nothing) or dissent.
+- Read the ticket, the diff, and the surrounding code. Same-round peers run in
+  parallel, so you will not see their reports; stay within your own scope.
+- In round 2 you are given the round-1 reports: do not re-report a finding
+  already addressed there. Concur (say so, add nothing) or dissent.
 - Trace concrete scenarios by hand rather than running the suite; the
   implementor hands over a green tree.
 - Reference concrete files and lines.

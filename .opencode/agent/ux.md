@@ -23,9 +23,10 @@ and then judge only the experience.
 Do **not** report logic/state bugs (correctness) or code style (readability).
 
 ## How
-- Read the ticket, the diff, and the earlier reports the ticket-orchestrator
-  passes you.
-- Do not re-report a prior finding. Concur or dissent.
+- Read the ticket, the diff, and `docs/design.md`. Same-round peers run in
+  parallel, so you will not see their reports; stay within your own scope.
+- In round 2 you are given the round-1 reports: do not re-report a finding
+  already addressed there. Concur or dissent.
 - Reference concrete files and lines, and quote the exact message text.
 
 ## Output

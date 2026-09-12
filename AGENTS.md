@@ -52,13 +52,15 @@ Rules:
 - `implementor` is the only agent that edits source.
 - Reviewers are read-only except for their own report file,
   `docs/reviews/<ticket-id>/<role>.md`; they never touch source.
-- Per ticket: implement, then run the ticket's `reviewers` in order, hand the
-  reports back to `implementor`, commit, and repeat for a second round.
-- Reviewers are stateful: each is given the earlier reports for the round and
-  must not re-report their findings. Round 2 resumes the same sessions.
+- Per ticket: implement, then run the ticket's `reviewers` **concurrently**, hand
+  the reports back to `implementor`, commit, and repeat for a second round.
+- Reviewers are stateful across rounds: within a round they run in parallel and
+  do not see each other's reports (their scopes are exclusive, so overlap is
+  not expected). Round 2 resumes the same sessions and gives each reviewer the
+  round-1 reports, so nothing fixed there is re-reported.
 - Findings carry no severity labels; a finding is work — fixed, or deferred to a
   named ticket/gate with a reason.
-- Omit reviewers that are irrelevant; keep the order of those that remain.
+- Omit reviewers that are irrelevant; list order is not significant.
 - Only `implementor` runs slow verification (build, `just test`, `just format`)
   and must leave the tree green. Reviewers read and reason.
 - Non-automatable acceptance criteria are recorded in `docs/manual-test.md`; the
